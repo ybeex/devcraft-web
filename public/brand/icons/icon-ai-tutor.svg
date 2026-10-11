@@ -1,0 +1,25 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="orbGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#f3cfa1"/><stop offset="55%" stop-color="#e7a977"/><stop offset="100%" stop-color="#8a5a35"/>
+    </radialGradient>
+    <linearGradient id="orbRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde2c2"/><stop offset="100%" stop-color="#b27343"/>
+    </linearGradient>
+    <filter id="orbShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+    <filter id="sparkleShadow" x="-80%" y="-80%" width="260%" height="260%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#221e17" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <g filter="url(#orbShadow)">
+    <circle cx="32" cy="34" r="20" fill="url(#orbGrad)"/>
+    <circle cx="32" cy="34" r="20" fill="none" stroke="url(#orbRim)" stroke-width="1.5" opacity="0.6"/>
+    <ellipse cx="25" cy="26" rx="6" ry="4" fill="#ffffff" opacity="0.4"/>
+  </g>
+  <g filter="url(#sparkleShadow)">
+    <path d="M48 14 L50 19 L55 21 L50 23 L48 28 L46 23 L41 21 L46 19 Z" fill="#fdfbf7" stroke="#b27343" stroke-width="0.75"/>
+    <path d="M16 44 L17.2 47 L20 48 L17.2 49 L16 52 L14.8 49 L12 48 L14.8 47 Z" fill="#fdfbf7" stroke="#b27343" stroke-width="0.6" opacity="0.95"/>
+  </g>
+</svg>
