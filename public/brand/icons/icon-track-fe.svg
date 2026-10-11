@@ -1,0 +1,27 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="feTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fcd9a8"/><stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="feBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef3e2"/><stop offset="100%" stop-color="#fde2c2"/>
+    </linearGradient>
+    <linearGradient id="feBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/><stop offset="100%" stop-color="#7c3a05"/>
+    </linearGradient>
+    <filter id="feShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#feShadow)">
+    <rect x="10" y="18" width="44" height="34" rx="6" fill="url(#feBase)"/>
+    <rect x="10" y="14" width="44" height="34" rx="6" fill="url(#feBody)"/>
+    <path d="M10 20 a6 6 0 0 1 6 -6 h32 a6 6 0 0 1 6 6 v6 h-44 Z" fill="url(#feTop)"/>
+    <circle cx="17" cy="20" r="2" fill="#ffffff" opacity="0.8"/>
+    <circle cx="23" cy="20" r="2" fill="#ffffff" opacity="0.6"/>
+    <circle cx="29" cy="20" r="2" fill="#ffffff" opacity="0.4"/>
+    <rect x="16" y="32" width="20" height="3" rx="1.5" fill="#d97706" opacity="0.5"/>
+    <rect x="16" y="38" width="28" height="3" rx="1.5" fill="#d97706" opacity="0.35"/>
+    <rect x="16" y="44" width="14" height="3" rx="1.5" fill="#d97706" opacity="0.35"/>
+  </g>
+</svg>

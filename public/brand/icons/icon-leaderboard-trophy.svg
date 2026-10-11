@@ -1,0 +1,30 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="trTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="trLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="trRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#92400e"/><stop offset="100%" stop-color="#6b3208"/>
+    </linearGradient>
+    <linearGradient id="trBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b27343"/><stop offset="100%" stop-color="#6b4226"/>
+    </linearGradient>
+    <filter id="trShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#trShadow)">
+    <path d="M18 16 C10 16 9 26 16 30 C18 31 20 30 21 28" fill="none" stroke="url(#trLeft)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M46 16 C54 16 55 26 48 30 C46 31 44 30 43 28" fill="none" stroke="url(#trRight)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M19 14 L45 14 L42 34 C42 42 37 47 32 47 C27 47 22 42 22 34 Z" fill="url(#trTop)"/>
+    <path d="M19 14 L32 14 L32 47 C27 47 22 42 22 34 L19 14 Z" fill="url(#trLeft)" opacity="0.55"/>
+    <path d="M45 14 L32 14 L32 47 C37 47 42 42 42 34 L45 14 Z" fill="url(#trRight)" opacity="0.55"/>
+    <rect x="28" y="47" width="8" height="6" fill="url(#trBase)"/>
+    <path d="M20 53 L44 53 L41 60 L23 60 Z" fill="url(#trBase)"/>
+    <rect x="19" y="11" width="26" height="5" rx="2" fill="url(#trTop)"/>
+    <rect x="19" y="11" width="26" height="5" rx="2" fill="#ffffff" opacity="0.15"/>
+  </g>
+</svg>

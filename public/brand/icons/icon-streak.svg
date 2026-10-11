@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flameTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd9a0"/><stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="flameCore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#c2530a"/>
+    </linearGradient>
+    <linearGradient id="flameShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b8460a"/><stop offset="100%" stop-color="#7a2e08"/>
+    </linearGradient>
+    <filter id="fShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#fShadow)">
+    <path d="M32 6 C40 16 46 26 46 36 C46 47 39.5 56 32 56 C24.5 56 18 47 18 36 C18 26 24 16 32 6 Z" fill="url(#flameShadow)"/>
+    <path d="M32 6 C24 16 18 26 18 36 C18 45 23 53 29.5 55.5 C26 47 27 34 32 26 C34 18 33 11 32 6 Z" fill="url(#flameTop)"/>
+    <path d="M32 22 C36 28 39 34 39 40 C39 47 35.5 52 32 52 C28.5 52 25 47 25 40 C25 36 27 31 32 22 Z" fill="url(#flameCore)"/>
+    <path d="M30 18 C28 22 27 25 28 28" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+  </g>
+</svg>

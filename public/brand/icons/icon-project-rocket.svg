@@ -1,0 +1,30 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rkTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde2c2"/><stop offset="100%" stop-color="#e7a977"/>
+    </linearGradient>
+    <linearGradient id="rkBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e7a977"/><stop offset="100%" stop-color="#8a5a35"/>
+    </linearGradient>
+    <linearGradient id="rkShadowSide" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6b4226"/><stop offset="100%" stop-color="#4a2d1a"/>
+    </linearGradient>
+    <linearGradient id="rkFlame" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="rkShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#rkShadow)">
+    <path d="M32 6 C40 14 43 24 43 34 L32 40 L21 34 C21 24 24 14 32 6 Z" fill="url(#rkBody)"/>
+    <path d="M32 6 C36 14 38 24 38 34 L32 38 L32 6 Z" fill="url(#rkTop)" opacity="0.7"/>
+    <path d="M21 34 L32 40 L32 56 L24 48 Z" fill="url(#rkShadowSide)"/>
+    <path d="M43 34 L32 40 L32 56 L40 48 Z" fill="url(#rkBody)"/>
+    <path d="M21 34 L12 44 L21 42 Z" fill="url(#rkShadowSide)"/>
+    <path d="M43 34 L52 44 L43 42 Z" fill="url(#rkBody)"/>
+    <circle cx="32" cy="24" r="5" fill="#fdfbf7" opacity="0.85"/>
+    <circle cx="32" cy="24" r="5" fill="none" stroke="#8a5a35" stroke-width="1.5"/>
+    <path d="M27 48 C29 52 30 56 32 60 C34 56 35 52 37 48 C34 50 30 50 27 48 Z" fill="url(#rkFlame)"/>
+  </g>
+</svg>
