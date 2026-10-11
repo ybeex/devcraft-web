@@ -1,0 +1,25 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cmTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8e8d8"/><stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="cmLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#0d8c63"/>
+    </linearGradient>
+    <linearGradient id="cmRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#08704f"/><stop offset="100%" stop-color="#055239"/>
+    </linearGradient>
+    <filter id="cmShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#cmShadow)">
+    <path d="M14 16 h36 a6 6 0 0 1 6 6 v18 a6 6 0 0 1 -6 6 H30 L20 56 V46 H14 a6 6 0 0 1 -6 -6 V22 a6 6 0 0 1 6 -6 Z" fill="url(#cmTop)"/>
+    <path d="M14 16 h18 v30 H14 a6 6 0 0 1 -6 -6 V22 a6 6 0 0 1 6 -6 Z" fill="url(#cmLeft)" opacity="0.6"/>
+    <path d="M50 16 a6 6 0 0 1 6 6 v18 a6 6 0 0 1 -6 6 H32 V16 Z" fill="url(#cmRight)" opacity="0.55"/>
+    <circle cx="22" cy="31" r="2.6" fill="#fdfbf7"/>
+    <circle cx="32" cy="31" r="2.6" fill="#fdfbf7"/>
+    <circle cx="42" cy="31" r="2.6" fill="#fdfbf7"/>
+    <path d="M14 16 h36 a6 6 0 0 1 6 6 v2 H8 v-2 a6 6 0 0 1 6 -6 Z" fill="#ffffff" opacity="0.18"/>
+  </g>
+</svg>
