@@ -1,0 +1,30 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="medTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="medLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="medRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#92400e"/><stop offset="100%" stop-color="#6b3208"/>
+    </linearGradient>
+    <linearGradient id="ribbonL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e7a977"/><stop offset="100%" stop-color="#b27343"/>
+    </linearGradient>
+    <linearGradient id="ribbonR" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8a5a35"/><stop offset="100%" stop-color="#5c3a22"/>
+    </linearGradient>
+    <filter id="medShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#221e17" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <g filter="url(#medShadow)">
+    <path d="M22 30 L12 54 L24 50 L29 60 L36 38 Z" fill="url(#ribbonL)"/>
+    <path d="M42 30 L52 54 L40 50 L35 60 L28 38 Z" fill="url(#ribbonR)"/>
+    <path d="M32 10 L48 19 L32 28 L16 19 Z" fill="url(#medTop)"/>
+    <path d="M16 19 L32 28 L32 40 L16 31 Z" fill="url(#medLeft)"/>
+    <path d="M48 19 L32 28 L32 40 L48 31 Z" fill="url(#medRight)"/>
+    <path d="M32 10 L48 19 L32 28 L16 19 Z" fill="#ffffff" opacity="0.18"/>
+  </g>
+</svg>
