@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { DevCraftMark } from '@/components/brand/DevCraftMark'
+import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
 
 /**
@@ -14,6 +15,11 @@ import { easeOut } from '@/lib/motion/variants'
  * one component so the two call sites can never visually drift apart.
  */
 export function NotFoundIllustration() {
+  // A signed-in learner who mistypes a URL belongs back in the app, not on the marketing site. Nothing is
+  // rendered in the button slot until the saved session has loaded, so the wrong buttons never flash.
+  const hydrated = useAuthStore((s) => s.hasHydrated)
+  const signedIn = useAuthStore((s) => !!s.accessToken)
+  const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN')
   return (
     <section className="mesh-bg mesh-animate flex min-h-[75vh] flex-col items-center justify-center px-6 py-20 text-center">
       <motion.div
@@ -50,18 +56,40 @@ export function NotFoundIllustration() {
         transition={{ duration: 0.4, delay: 0.35, ease: easeOut }}
         className="relative z-10 mt-8 flex flex-wrap justify-center gap-3"
       >
-        <Link
-          href="/"
-          className="btn-3d flex items-center gap-2 rounded-[var(--radius-md)] px-6 py-3 text-sm font-semibold text-white"
-        >
-          Back to home <ArrowRight size={16} />
-        </Link>
-        <Link
-          href="/blog"
-          className="flex items-center gap-2 rounded-[var(--radius-md)] border border-rim bg-card px-6 py-3 text-sm font-semibold text-ink shadow-elev-sm hover:shadow-elev-md"
-        >
-          Read the blog instead
-        </Link>
+        {!hydrated ? null : signedIn ? (
+          <>
+            <Link
+              href="/dashboard"
+              data-testid="404-dashboard"
+              className="btn-3d flex items-center gap-2 rounded-[var(--radius-md)] px-6 py-3 text-sm font-semibold text-white"
+            >
+              Back to your dashboard <ArrowRight size={16} />
+            </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 rounded-[var(--radius-md)] border border-rim bg-card px-6 py-3 text-sm font-semibold text-ink shadow-elev-sm hover:shadow-elev-md"
+              >
+                Admin console
+              </Link>
+            )}
+          </>
+        ) : (
+          <>
+            <Link
+              href="/"
+              className="btn-3d flex items-center gap-2 rounded-[var(--radius-md)] px-6 py-3 text-sm font-semibold text-white"
+            >
+              Back to home <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/blog"
+              className="flex items-center gap-2 rounded-[var(--radius-md)] border border-rim bg-card px-6 py-3 text-sm font-semibold text-ink shadow-elev-sm hover:shadow-elev-md"
+            >
+              Read the blog instead
+            </Link>
+          </>
+        )}
       </motion.div>
     </section>
   )

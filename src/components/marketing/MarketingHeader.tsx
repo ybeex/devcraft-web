@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Moon, Sun, Menu, X } from 'lucide-react'
 import { DevCraftMark } from '@/components/brand/DevCraftMark'
 import { Button } from '@/components/ui/Button'
+import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
 
 const NAV_LINKS = [
@@ -20,6 +21,12 @@ const NAV_LINKS = [
 export function MarketingHeader() {
   const { resolvedTheme, setTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
+  // A signed-in learner sees a way back into the app instead of the sign-up buttons. The sign-up buttons stay
+  // in the server-rendered page (visitors without scripts still get them) and swap once the saved session loads.
+  const hydrated = useAuthStore((s) => s.hasHydrated)
+  const signedIn = useAuthStore((s) => !!s.accessToken)
+  const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN')
+  const appHref = isAdmin ? '/admin' : '/dashboard'
 
   return (
     <header className="sticky top-0 z-50 border-b border-rim-subtle bg-canvas/80 backdrop-blur-md">
@@ -49,12 +56,21 @@ export function MarketingHeader() {
           >
             {resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <Link href="/login" className="hidden text-sm font-medium text-dim hover:text-ink sm:block">
-            Log in
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Start free</Button>
-          </Link>
+          {hydrated && signedIn && (
+            <Link href={appHref} data-testid="header-app-link">
+              <Button size="sm">{isAdmin ? 'Admin console' : 'Dashboard'}</Button>
+            </Link>
+          )}
+          {!(hydrated && signedIn) && (
+            <>
+              <Link href="/login" className="hidden text-sm font-medium text-dim hover:text-ink sm:block">
+                Log in
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Start free</Button>
+              </Link>
+            </>
+          )}
           <button
             className="flex h-9 w-9 items-center justify-center rounded-full border border-rim-subtle bg-card text-ink md:hidden"
             onClick={() => setMobileOpen((v) => !v)}
@@ -85,13 +101,15 @@ export function MarketingHeader() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-dim hover:bg-card hover:text-ink"
-              >
-                Log in
-              </Link>
+              {(
+                <Link
+                  href={hydrated && signedIn ? appHref : '/login'}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-dim hover:bg-card hover:text-ink"
+                >
+                  {hydrated && signedIn ? (isAdmin ? 'Admin console' : 'Dashboard') : 'Log in'}
+                </Link>
+              )}
             </div>
           </motion.nav>
         )}
