@@ -33,8 +33,7 @@ export function LoginForm() {
     try {
       const session = await loginUser(values)
       setSession(session)
-      // Someone who closed the tab mid-onboarding gets the welcome flow; everyone else goes straight in.
-      router.push(session.user.onboardedAt === null ? '/onboarding' : '/dashboard')
+      router.push(getLoginDestination(session.user.onboardedAt))
     } catch (err) {
       if (err instanceof ApiRequestError) {
         setServerError(
@@ -118,6 +117,11 @@ export function LoginForm() {
       </p>
     </motion.div>
   )
+}
+
+function getLoginDestination(onboardedAt: string | null | undefined): string {
+  // Someone who closed the tab mid-onboarding gets the welcome flow; everyone else goes straight in.
+  return onboardedAt === null ? '/onboarding' : '/dashboard'
 }
 
 function Field({
