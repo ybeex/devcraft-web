@@ -5,6 +5,7 @@ export interface SearchResultLesson {
   title: string
   slug: string
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  track: 'FE' | 'BE'
 }
 
 export interface SearchResultPost {

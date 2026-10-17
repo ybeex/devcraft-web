@@ -35,3 +35,17 @@ export function findNextLesson(
 
   return null // status entry referenced a lesson no longer in the published curriculum
 }
+
+/**
+ * The lesson that follows `slug` in curriculum order (modules by `order`,
+ * then lessons by `order`), crossing module boundaries. Returns null for the
+ * last lesson of the track or an unknown slug. Used by the "Next lesson"
+ * button shown once the current lesson is complete.
+ */
+export function lessonAfter(curriculum: CurriculumTrack, slug: string): NextLessonResult | null {
+  const flat: NextLessonResult[] = [...curriculum.modules]
+    .sort((a, b) => a.order - b.order)
+    .flatMap((module) => [...module.lessons].sort((a, b) => a.order - b.order).map((lesson) => ({ module, lesson })))
+  const i = flat.findIndex((e) => e.lesson.slug === slug)
+  return i >= 0 && i < flat.length - 1 ? flat[i + 1] : null
+}

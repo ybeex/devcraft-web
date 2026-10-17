@@ -35,7 +35,10 @@ export function CurriculumTree({ track }: { track: 'FE' | 'BE' }) {
     queryFn: () => getBulkLessonStatus(track),
   })
 
-  const moduleStates = useMemo(() => curriculum && statuses ? computeModuleStates(curriculum.modules, statuses) : [], [curriculum, statuses])
+  const moduleStates = useMemo(
+    () => (curriculum && statuses ? computeModuleStates(curriculum.modules, statuses) : []),
+    [curriculum, statuses],
+  )
 
   const toggleModule = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -53,7 +56,7 @@ export function CurriculumTree({ track }: { track: 'FE' | 'BE' }) {
   // shifts every card below it.
   useLayoutEffect(() => {
     if (!containerRef.current || moduleStates.length < 2) {
-      setConnectors([])
+      setConnectors((current) => (current.length === 0 ? current : []))
       return
     }
 
