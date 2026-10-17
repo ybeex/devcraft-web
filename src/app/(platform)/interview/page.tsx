@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Shuffle } from 'lucide-react'
@@ -19,6 +19,7 @@ import {
   type ReviewStatus,
 } from '@/lib/api/interview'
 import { listChallenges, getMyChallengeProgress } from '@/lib/api/system-design'
+import { useAuthStore } from '@/stores/auth-store'
 import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
 
 const QUESTIONS_PAGE_SIZE = 30
@@ -29,7 +30,15 @@ const DIFFICULTY_OPTIONS = ['All', 'Beginner', 'Intermediate', 'Advanced']
 export default function InterviewPage() {
   const queryClient = useQueryClient()
   const [mode, setMode] = useState<'Q&A' | 'System design'>('Q&A')
-  const [trackLabel, setTrackLabel] = useState('All')
+  const myTrack = useAuthStore((s) => s.user?.primaryTrack ?? null)
+  const hydrated = useAuthStore((s) => s.hasHydrated)
+  const [trackLabel, setTrackLabel] = useState<string>(myTrack ?? 'All')
+  // Questions open on the learner's own track. The saved session can arrive after the first render, so the
+  // default is applied once it does, and never again after the learner has picked a filter themselves.
+  const trackTouched = useRef(false)
+  useEffect(() => {
+    if (hydrated && myTrack && !trackTouched.current) setTrackLabel(myTrack)
+  }, [hydrated, myTrack])
   const [difficultyLabel, setDifficultyLabel] = useState('All')
   const [sortMode, setSortMode] = useState<'default' | 'random'>('default')
   const [shuffleNonce, setShuffleNonce] = useState(0)
@@ -123,7 +132,7 @@ export default function InterviewPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={(v) => setMode(v as 'Q&A' | 'System design')} />
-          <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={setTrackLabel} />
+          <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={(v) => { trackTouched.current = true; setTrackLabel(v) }} />
           <SegmentedControl options={DIFFICULTY_OPTIONS} value={difficultyLabel} onChange={setDifficultyLabel} />
           {mode === 'Q&A' && (
             <div className="flex items-center gap-2">

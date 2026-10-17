@@ -52,7 +52,7 @@ const TONES: Record<Tone, { sub: string; card: string; cardOn: string; link: str
 const CHOICES: Array<{ id: SelfReport; title: string; body: string }> = [
   { id: 'new', title: 'I’m new to this', body: 'Start from the very beginning. No questions.' },
   { id: 'some', title: 'I know some of it', body: 'A short check that starts a little further in.' },
-  { id: 'test', title: 'Test me', body: 'About 6 questions to find exactly where to start.' },
+  { id: 'test', title: 'Test me', body: 'About 10 questions, some of them code-reading, to find exactly where to start.' },
 ]
 
 const LEVEL_TEXT: Record<PlacementResult['level'], string> = {
@@ -164,6 +164,11 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
       >
         <p className={cn('text-xs font-semibold uppercase tracking-wide', t.sub)}>Question {q.number} of about {q.ofAbout}</p>
         <h2 ref={heading} tabIndex={-1} id="placement-q" className="mt-3 max-w-md whitespace-pre-wrap font-display text-xl font-bold outline-none sm:text-2xl">{q.prompt}</h2>
+        {q.code && (
+          <pre data-testid="placement-code" tabIndex={0} aria-label="Code to read" className="mt-5 w-full max-w-md overflow-x-auto rounded-[var(--radius-md)] border border-rim-subtle bg-card p-4 text-left font-mono text-[13px] leading-relaxed text-ink">
+            <code>{q.code}</code>
+          </pre>
+        )}
 
         <div role="radiogroup" aria-labelledby="placement-q" className="mt-8 flex w-full max-w-md flex-col gap-3 text-left">
           {q.options.map((option, i) => {
