@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
-import { RefreshCw, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, RefreshCw, Trash2 } from 'lucide-react'
 import { buildWebPreviewDocument, type WebModeContent } from '@/lib/api/playground'
 import { cn } from '@/lib/utils'
 
@@ -45,6 +45,14 @@ export function WebModeEditor({ value, onChange, theme }: WebModeEditorProps) {
   const [activeTab, setActiveTab] = useState<keyof WebModeContent>('html')
   const [refreshKey, setRefreshKey] = useState(0)
   const [logs, setLogs] = useState<ConsoleLine[]>([])
+  // The console only matters while writing JS. On the HTML/CSS tabs it folds
+  // away so the preview gets the full height; switching back to JS reopens it.
+  // The header stays as a slim bar so it can still be toggled by hand.
+  const [consoleOpen, setConsoleOpen] = useState(false)
+  // Follow the active tab: open on JS, folded on HTML/CSS. A manual toggle sticks until the tab changes again.
+  useEffect(() => {
+    setConsoleOpen(activeTab === 'js')
+  }, [activeTab])
   const logIdRef = useRef(0)
   const consoleEndRef = useRef<HTMLDivElement>(null)
 
@@ -133,20 +141,31 @@ export function WebModeEditor({ value, onChange, theme }: WebModeEditorProps) {
           />
         </div>
 
-        <div className="flex min-h-0 flex-[2] flex-col border-t border-rim-subtle">
+        <div
+          data-testid="web-console"
+          data-open={consoleOpen}
+          className={cn('flex min-h-0 flex-col border-t border-rim-subtle', consoleOpen ? 'flex-[2]' : 'flex-none')}
+        >
           <div className="flex items-center justify-between border-b border-rim-subtle bg-raised px-3 py-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-ghost">
-              Console{logs.length > 0 && ` (${logs.length})`}
-            </span>
             <button
-              onClick={() => setLogs([])}
-              title="Clear console"
-              className="rounded-[var(--radius-sm)] p-1 text-ghost transition-colors hover:text-dim"
+              onClick={() => setConsoleOpen((o) => !o)}
+              aria-expanded={consoleOpen}
+              className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-ghost hover:text-dim"
             >
-              <Trash2 size={12} />
+              {consoleOpen ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+              Console{logs.length > 0 && ` (${logs.length})`}
             </button>
+            {consoleOpen && (
+              <button
+                onClick={() => setLogs([])}
+                title="Clear console"
+                className="rounded-[var(--radius-sm)] p-1 text-ghost transition-colors hover:text-dim"
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto bg-canvas px-3 py-2 font-mono text-[12px] leading-relaxed">
+          <div className={cn('min-h-0 flex-1 overflow-y-auto bg-canvas px-3 py-2 font-mono text-[12px] leading-relaxed', !consoleOpen && 'hidden')}>
             {logs.length === 0 ? (
               <p className="text-ghost">console.log and errors from your script show up here — not just in devtools.</p>
             ) : (

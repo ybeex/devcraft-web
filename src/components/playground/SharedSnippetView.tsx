@@ -8,6 +8,7 @@ import { ArrowLeft, Copy, Check } from 'lucide-react'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { getSnippetByShareToken, parseWebContent, buildWebPreviewDocument } from '@/lib/api/playground'
 import { ApiRequestError } from '@/lib/api/client'
+import { SyntaxCode } from '@/lib/markdown/SyntaxCode'
 
 export function SharedSnippetView({ token }: { token: string }) {
   const [copied, setCopied] = useState(false)
@@ -101,7 +102,7 @@ export function SharedSnippetView({ token }: { token: string }) {
                     {key}
                   </div>
                   <pre className="overflow-x-auto bg-card p-4">
-                    <code className="font-mono text-[13px] leading-relaxed text-ink">{webContent[key]}</code>
+                    <SyntaxCode code={webContent[key]} language={key} />
                   </pre>
                 </div>
               )
@@ -115,7 +116,7 @@ export function SharedSnippetView({ token }: { token: string }) {
             <span className="h-2 w-2 rounded-full bg-success/60" />
           </div>
           <pre className="overflow-x-auto bg-card p-5">
-            <code className="font-mono text-[13px] leading-relaxed text-ink">{snippet.code}</code>
+            <SyntaxCode code={snippet.code} language={snippet.language} />
           </pre>
         </div>
       )}
