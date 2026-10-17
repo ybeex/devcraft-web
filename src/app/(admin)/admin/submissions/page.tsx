@@ -220,7 +220,7 @@ function SubmissionRow({
                 </Button>
               </div>
               {submission.aiReview ? (
-                <pre className="whitespace-pre-wrap font-sans text-xs text-dim">{submission.aiReview}</pre>
+                <div className="max-h-[28rem] overflow-y-auto"><pre className="whitespace-pre-wrap font-sans text-xs text-dim">{submission.aiReview}</pre></div>
               ) : (
                 <p className="text-xs text-ghost">Not reviewed yet.</p>
               )}
