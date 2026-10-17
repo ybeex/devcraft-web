@@ -1,21 +1,34 @@
 'use client'
 
 import { CheckCircle2, XCircle, Terminal } from 'lucide-react'
+import { useMemo } from 'react'
 import type { RunResult, CheckResult } from '@/lib/api/lessons'
 import { cn } from '@/lib/utils'
 
 interface LessonOutputPaneProps {
   runResult: RunResult | null
   checkResult: CheckResult | null
-  activeTab: 'output' | 'tests'
-  onTabChange: (tab: 'output' | 'tests') => void
+  activeTab: 'output' | 'tests' | 'preview'
+  onTabChange: (tab: 'output' | 'tests' | 'preview') => void
+  /** HTML lessons have nothing to run: they get a live preview of the markup instead of an Output tab. */
+  language?: string
+  code?: string
 }
 
-export function LessonOutputPane({ runResult, checkResult, activeTab, onTabChange }: LessonOutputPaneProps) {
+/** The learner's markup, rendered with scripts disabled. It is only ever shown, never executed. */
+export function htmlPreviewDocument(code: string): string {
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><base target="_blank"><style>body{font-family:system-ui,sans-serif;margin:16px;color:#111}</style></head><body>${code}</body></html>`
+}
+
+export function LessonOutputPane({ runResult, checkResult, activeTab, onTabChange, language, code }: LessonOutputPaneProps) {
+  const isHtml = language === 'html'
+  const doc = useMemo(() => (isHtml ? htmlPreviewDocument(code ?? '') : ''), [isHtml, code])
   return (
     <div className="flex h-full flex-col border-t border-rim-subtle bg-canvas">
       <div className="flex border-b border-rim-subtle">
-        <TabButton active={activeTab === 'output'} onClick={() => onTabChange('output')} label="Output" />
+        {isHtml
+          ? <TabButton active={activeTab === 'preview'} onClick={() => onTabChange('preview')} label="Preview" />
+          : <TabButton active={activeTab === 'output'} onClick={() => onTabChange('output')} label="Output" />}
         <TabButton
           active={activeTab === 'tests'}
           onClick={() => onTabChange('tests')}
@@ -24,7 +37,17 @@ export function LessonOutputPane({ runResult, checkResult, activeTab, onTabChang
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 font-mono text-[13px]">
+      {isHtml && activeTab === 'preview' && (
+        <iframe
+          title="Live preview"
+          data-testid="html-preview"
+          // An empty sandbox: no scripts, no forms, no same-origin access. The markup is rendered, nothing more.
+          sandbox=""
+          srcDoc={doc}
+          className="min-h-0 flex-1 bg-white"
+        />
+      )}
+      <div className={cn('flex-1 overflow-y-auto p-4 font-mono text-[13px]', isHtml && activeTab === 'preview' && 'hidden')}>
         {activeTab === 'output' && <OutputView result={runResult} />}
         {activeTab === 'tests' && <TestsView result={checkResult} />}
       </div>

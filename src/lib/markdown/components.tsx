@@ -1,4 +1,5 @@
 import type { Components } from 'react-markdown'
+import { SyntaxCode } from './SyntaxCode'
 
 /**
  * Shared prose renderer for react-markdown. Originally lived inline in
@@ -41,7 +42,7 @@ export const markdownComponents: Components = {
           {language && <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide text-ghost">{language}</span>}
         </div>
         <pre className="overflow-x-auto bg-card p-4">
-          <code className="font-mono text-[13px] leading-relaxed text-ink">{children}</code>
+          <SyntaxCode code={String(children).replace(/\n$/, '')} language={language} />
         </pre>
       </div>
     )

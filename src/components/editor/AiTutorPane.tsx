@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Send, Sparkles, AlertTriangle, Loader2 } from 'lucide-react'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { getAiCredits, getHint, explainError, reviewCode, getAiHistory } from '@/lib/api/ai'
 import { ApiRequestError } from '@/lib/api/client'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { markdownComponents } from '@/lib/markdown/components'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -106,7 +109,7 @@ export function AiTutorPane({ lessonId, language, currentCode, pendingError, onE
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-rim-subtle bg-card px-4 py-3">
+      <div className="flex items-center justify-between border-b border-rim-subtle bg-card py-3 pl-4 pr-12">
         <div className="flex items-center gap-2">
           <FeatureIcon name="aiTutor" size={26} />
           <span className="font-ui text-sm font-semibold text-ink">AI Tutor</span>
@@ -145,13 +148,18 @@ export function AiTutorPane({ lessonId, language, currentCode, pendingError, onE
             >
               <div
                 className={cn(
-                  'max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
+                  'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
+                  msg.role !== 'assistant' && 'whitespace-pre-wrap',
                   msg.role === 'user' && 'rounded-tr-sm bg-brand text-white',
                   msg.role === 'assistant' && 'rounded-tl-sm bg-card text-ink',
                   msg.role === 'system' && 'w-full rounded-lg bg-[var(--negative-bg)] text-center text-xs text-[var(--negative-text)]'
                 )}
               >
-                {msg.content}
+                {msg.role === 'assistant' ? (
+                  <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {msg.content}
+                  </Markdown>
+                ) : msg.content}
               </div>
             </motion.div>
           ))}
