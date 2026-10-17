@@ -28,28 +28,29 @@ async function authFetchInternal<R>(
   } catch (err) {
     if (!(err instanceof ApiRequestError) || err.statusCode !== 401) throw err
 
-    const { refreshToken, logout, setTokens } = useAuthStore.getState()
-    if (!refreshToken) {
-      logout()
+    const { user, logout, setTokens } = useAuthStore.getState()
+    if (!user) {
+      // Not signed in at all: nothing to refresh.
       throw err
     }
 
     try {
       if (!refreshInFlight) {
         refreshInFlight = (async () => {
-          const result = await apiFetch<{ accessToken: string; refreshToken: string; expiresIn: number }>(
-            '/auth/refresh',
-            { method: 'POST', body: { refreshToken } }
-          )
-          setTokens({ accessToken: result.accessToken, refreshToken: result.refreshToken })
+          // The refresh token travels in the httpOnly cookie; the server rotates it and answers with a new access token.
+          const result = await apiFetch<{ accessToken: string; expiresIn: number }>('/auth/refresh', { method: 'POST', body: {} })
+          setTokens({ accessToken: result.accessToken })
         })().finally(() => {
           refreshInFlight = null
         })
       }
       await refreshInFlight
-    } catch {
-      logout()
-      throw err // surface the original 401, not the refresh failure
+    } catch (refreshErr) {
+      // Only a definitive "this session is over" answer from the server ends the session. A network blip or
+      // a 5xx during refresh must not log someone out of a week-long session; they just retry next request.
+      const definitive = refreshErr instanceof ApiRequestError && (refreshErr.statusCode === 401 || refreshErr.statusCode === 403)
+      if (definitive) logout()
+      throw err
     }
 
     // Retry once with the freshly-rotated token. If this also fails, let it throw.

@@ -7,7 +7,6 @@ import type { AuthUser } from '@/stores/auth-store'
 export interface AuthSession {
   user: AuthUser
   accessToken: string
-  refreshToken: string
   expiresIn: number
 }
 
@@ -44,8 +43,8 @@ export function resendVerification(): Promise<{ message: string }> {
   return authFetch('/auth/resend-verification', { method: 'POST' })
 }
 
-export function logoutUser(refreshToken: string): Promise<{ message: string }> {
-  return authFetch('/auth/logout', { method: 'POST', body: { refreshToken } })
+export function logoutUser(): Promise<{ message: string }> {
+  return authFetch('/auth/logout', { method: 'POST', body: {} })
 }
 
 /** Full profile (xp, level, streak, tier, etc.) — GET /users/me, not the
