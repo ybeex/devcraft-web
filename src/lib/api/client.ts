@@ -70,15 +70,23 @@ export async function apiFetchWithMeta<T>(
   return { data: json.data, meta: json.meta }
 }
 
+/** The browser's IANA zone, so the server counts streak days on the learner's own calendar. */
+function browserTimezone(): string | undefined {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined } catch { return undefined }
+}
+
 async function rawApiFetch<T>(path: string, options: RequestOptions = {}): Promise<ApiSuccess<T>> {
   const { body, token, idempotencyKey, headers, ...rest } = options
 
   const res = await fetch(`${API_URL}${path}`, {
+    credentials: 'include',   // the refresh token is an httpOnly cookie
     ...rest,
     headers: {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
       ...(idempotencyKey && { 'Idempotency-Key': idempotencyKey }),
+      'X-Auth-Mode': 'cookie',
+      ...(browserTimezone() && { 'X-Timezone': browserTimezone()! }),
       ...headers,
     },
     body: body ? JSON.stringify(body) : undefined,

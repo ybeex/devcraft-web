@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
@@ -51,6 +51,22 @@ export function OnboardingFlow() {
     if (!accessToken) router.replace('/login')
     else if (user?.onboardedAt) router.replace('/dashboard')
   }, [hasHydrated, accessToken, user?.onboardedAt, router])
+
+  /**
+   * Record the track the moment it is known (picked in step 1, or carried from the marketing page) rather
+   * than only at the very end. Closing the tab half way, or a failed final save, no longer leaves the
+   * learner on a dashboard that asks for a track they already chose. Best effort: the final save repeats it.
+   */
+  const persistedTrack = useRef<string | null>(null)
+  function persistTrack(track: 'FE' | 'BE') {
+    if (persistedTrack.current === track) return
+    persistedTrack.current = track
+    updateProfile({ primaryTrack: track }).then(updateUser).catch(() => { persistedTrack.current = null })
+  }
+  useEffect(() => {
+    if (hasHydrated && accessToken && fromMarketing && !user?.primaryTrack) persistTrack(fromMarketing)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated, accessToken])
 
   function toggleGoal(goal: Goal) {
     setSelectedGoals((prev) => (prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]))
@@ -132,7 +148,7 @@ export function OnboardingFlow() {
         <AnimatePresence mode="wait">
           <motion.div key={step} variants={pageTransition('forward')} initial="initial" animate="animate" exit="exit" className="[&_h1]:outline-none">
             {step === 0 && (
-              <TrackSelectStep selected={selectedTrack} onSelect={setSelectedTrack} onContinue={() => setStep(1)} />
+              <TrackSelectStep selected={selectedTrack} onSelect={(t) => { setSelectedTrack(t); persistTrack(t) }} onContinue={() => setStep(1)} />
             )}
             {step === 1 && <GoalsStep selected={selectedGoals} onToggle={toggleGoal} onContinue={() => setStep(selectedTrack ? 2 : 3)} />}
             {step === 2 && selectedTrack && (

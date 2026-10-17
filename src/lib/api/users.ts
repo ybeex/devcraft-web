@@ -9,7 +9,8 @@ import type { AuthUser } from '@/stores/auth-store'
 export interface UpdateProfileBody {
   displayName?: string
   bio?: string
-  avatar?: string
+  /** https image URL or a built-in avatar; null removes it. */
+  avatar?: string | null
   primaryTrack?: 'FE' | 'BE'
   goals?: Array<'job-ready' | 'level-up' | 'curious' | 'career-switch'>
   /** The welcome flow was finished or skipped. One-way on the server. */
