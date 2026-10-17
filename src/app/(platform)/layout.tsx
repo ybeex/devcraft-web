@@ -8,6 +8,7 @@ import { TopBar } from '@/components/dashboard/TopBar'
 import { BrandedLoader } from '@/components/brand/BrandedLoader'
 import { useAuthStore } from '@/stores/auth-store'
 import { useProfileSync } from '@/lib/hooks/useProfileSync'
+import { ProBanner } from '@/components/dashboard/ProBanner'
 import { VerifyEmailPrompt } from '@/components/auth/VerifyEmailPrompt'
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
@@ -61,6 +62,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       {/* Main column */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar onOpenMobileNav={() => setMobileNavOpen(true)} />
+        <ProBanner />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
