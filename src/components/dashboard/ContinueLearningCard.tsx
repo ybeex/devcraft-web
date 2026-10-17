@@ -29,6 +29,9 @@ export function ContinueLearningCard() {
     enabled: !!track,
   })
 
+  const ready = useAuthStore((s) => s.hasHydrated)
+  // Until the saved session is loaded the track is unknown, not missing: never flash the picker at someone who has one.
+  if (!ready) return <div className="h-44 animate-pulse rounded-[var(--radius-xl)] border border-rim-subtle bg-card" />
   if (!track) return <TrackPicker />
 
   if (isLoading) {
@@ -137,7 +140,10 @@ export function ProLockNote({ moduleTitle, className = '' }: { moduleTitle: stri
         <Lock size={14} className="mr-1.5 inline -translate-y-px text-brand" aria-hidden />
         You placed into <strong>{moduleTitle}</strong>, which is part of Pro. Until then, here is the free material to build on.
       </p>
-      <Link href="/pricing" className="shrink-0 font-semibold text-ink underline underline-offset-4 hover:no-underline">See Pro plans</Link>
+      <span className="flex shrink-0 gap-4">
+        <Link href="/pro" className="font-semibold text-ink underline underline-offset-4 hover:no-underline">Redeem a code</Link>
+        <Link href="/pricing" className="font-semibold text-ink underline underline-offset-4 hover:no-underline">See Pro plans</Link>
+      </span>
     </div>
   )
 }
