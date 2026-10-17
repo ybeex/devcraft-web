@@ -5,6 +5,7 @@ import { ContinueLearningCard } from '@/components/dashboard/ContinueLearningCar
 import { XpGoalRing } from '@/components/dashboard/XpGoalRing'
 import { StatsGrid } from '@/components/dashboard/StatsGrid'
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
+import { ProjectProgress } from '@/components/dashboard/ProjectProgress'
 import { CommunitySnippet } from '@/components/dashboard/CommunitySnippet'
 import { VerifyEmailBanner } from '@/components/auth/VerifyEmailBanner'
 import { useAuthStore } from '@/stores/auth-store'
@@ -53,6 +54,7 @@ export default function DashboardPage() {
         </motion.div>
         <motion.div variants={cascadeItem} className="flex flex-col gap-6">
           <XpGoalRing />
+          <ProjectProgress />
           <CommunitySnippet />
         </motion.div>
       </div>

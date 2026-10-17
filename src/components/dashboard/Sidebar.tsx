@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, FolderKanban, Code2,
-  MessagesSquare, User, Users, Trophy, PanelLeftClose, PanelLeftOpen, ShieldCheck,
+  MessagesSquare, Sparkles, LogOut, User, Users, Trophy, PanelLeftClose, PanelLeftOpen, ShieldCheck,
 } from 'lucide-react'
+import { useLogout } from '@/lib/hooks/useLogout'
 import { DevCraftMark } from '@/components/brand/DevCraftMark'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { useAuthStore } from '@/stores/auth-store'
@@ -27,6 +28,7 @@ function buildNavItems(primaryTrack: 'FE' | 'BE' | null): NavItem[] {
     { href: '/interview', label: 'Interview Prep', icon: MessagesSquare },
     { href: '/community', label: 'Community', icon: Users },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { href: '/pro', label: 'Pro access', icon: Sparkles },
   ]
 }
 
@@ -38,6 +40,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarProps) {
+  const { logout, busy: loggingOut } = useLogout()
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
 
@@ -145,6 +148,20 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
             {!collapsed && <span>Portfolio</span>}
           </Link>
         )}
+
+        <button
+          type="button"
+          onClick={() => void logout()}
+          disabled={loggingOut}
+          className={cn(
+            'mb-2 flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium text-dim transition-colors hover:bg-raised hover:text-ink disabled:opacity-60',
+            collapsed && 'justify-center px-0'
+          )}
+          title={collapsed ? 'Log out' : undefined}
+        >
+          <LogOut size={19} />
+          {!collapsed && <span>{loggingOut ? 'Logging out…' : 'Log out'}</span>}
+        </button>
 
         {!collapsed && user && (
           <div className="flex flex-col gap-2.5 rounded-[var(--radius-lg)] bg-raised p-3">
