@@ -3,6 +3,9 @@ import { authFetch } from './auth-fetch'
 
 export interface ProjectListItem {
   id: string
+  slug: string | null
+  outcomes: string[]
+  module?: { slug: string; title: string; track: { slug: 'FE' | 'BE'; name: string } } | null
   title: string
   description: string
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
@@ -46,6 +49,8 @@ export interface MySubmission {
   status: 'PENDING' | 'APPROVED' | 'NEEDS_REVISION'
   aiReview: string | null
   aiScore: number | null
+  reviewFeedback?: string | null
+  reviewedAt?: string | null
   createdAt: string
   updatedAt: string
   project: {
@@ -62,6 +67,7 @@ export interface ProjectListParams {
   page?: number
   limit?: number
   difficulty?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
+  track?: 'FE' | 'BE'
 }
 
 export interface SubmitProjectBody {
@@ -76,6 +82,7 @@ export async function listProjects(params: ProjectListParams = {}): Promise<{ pr
   if (params.page) qs.set('page', String(params.page))
   if (params.limit) qs.set('limit', String(params.limit))
   if (params.difficulty) qs.set('difficulty', params.difficulty)
+  if (params.track) qs.set('track', params.track)
 
   const { data, meta } = await apiFetchWithMeta<ProjectListItem[]>(`/projects?${qs.toString()}`)
   return { projects: data, total: meta?.total ?? data.length }

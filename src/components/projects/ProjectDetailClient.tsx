@@ -141,6 +141,17 @@ export function ProjectDetailClient({ id }: { id: string }) {
           </div>
         )}
 
+        {project.outcomes?.length > 0 && (
+          <div className="mt-4 rounded-[var(--radius-lg)] border border-rim-subtle bg-card p-5" data-testid="project-outcomes">
+            <h3 className="font-ui text-sm font-semibold text-ink">What you will practise</h3>
+            <ul className="mt-2.5 list-disc space-y-1.5 pl-5 text-sm text-dim">
+              {project.outcomes.map((o, i) => (
+                <li key={i}>{o}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {project.stages.length > 0 && (
           <div className="mt-8">
             <h2 className="font-display text-xl font-bold text-ink">Build stages</h2>

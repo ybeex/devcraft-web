@@ -52,6 +52,19 @@ export function SubmissionStatusCard({ submission }: { submission: MySubmission 
 
       {submission.notes && <p className="text-sm leading-relaxed text-dim">{submission.notes}</p>}
 
+      {submission.reviewFeedback && (
+        <div
+          data-testid="reviewer-feedback"
+          className={`rounded-[var(--radius-lg)] border p-4 ${submission.status === 'NEEDS_REVISION' ? 'border-warning/40 bg-warning/10' : 'border-success/40 bg-success/10'}`}
+        >
+          <span className="font-ui text-xs font-semibold uppercase tracking-wide text-dim">
+            {submission.status === 'NEEDS_REVISION' ? 'What to change' : 'Reviewer note'}
+          </span>
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">{submission.reviewFeedback}</p>
+          <p className="mt-2 text-xs text-ghost">Update your links or notes and resubmit to send it back for review.</p>
+        </div>
+      )}
+
       {submission.aiReview && (
         <div className="rounded-[var(--radius-lg)] bg-raised p-4">
           <div className="flex items-center justify-between">
