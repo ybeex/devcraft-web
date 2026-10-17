@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, MessageCircle, TerminalSquare } from 'lucide-react'
+import { ArrowLeft, ArrowRight, MessageCircle, TerminalSquare, X } from 'lucide-react'
 import Link from 'next/link'
 import { LessonContentPane } from './LessonContentPane'
 import { LessonEditorPane } from './LessonEditorPane'
@@ -15,11 +15,13 @@ import {
   getLesson, startLesson, runCode, checkCode, completeLesson,
   type RunResult, type CheckResult,
 } from '@/lib/api/lessons'
+import { getTrackCurriculum } from '@/lib/api/curriculum'
+import { lessonAfter } from '@/lib/utils/next-lesson'
 import { useLessonTimer } from '@/lib/hooks/useLessonTimer'
 import { rewardPulse } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
 
-type MobileTab = 'content' | 'editor' | 'ai'
+type MobileTab = 'content' | 'editor'
 
 export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: string }) {
   const queryClient = useQueryClient()
@@ -30,25 +32,42 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
     queryFn: () => getLesson(slug),
   })
 
+  const { data: curriculum } = useQuery({
+    queryKey: ['curriculum-track', track],
+    queryFn: () => getTrackCurriculum(track),
+    staleTime: 5 * 60_000,
+  })
+
   const [code, setCode] = useState('')
   const [runResult, setRunResult] = useState<RunResult | null>(null)
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null)
-  const [outputTab, setOutputTab] = useState<'output' | 'tests'>('output')
+  const [outputTab, setOutputTab] = useState<'output' | 'tests' | 'preview'>('output')
   const [mobileTab, setMobileTab] = useState<MobileTab>('content')
   const [isRunning, setIsRunning] = useState(false)
   const [isChecking, setIsChecking] = useState(false)
   const [pendingError, setPendingError] = useState<string | null>(null)
+  const [aiOpen, setAiOpen] = useState(false)
   const [reward, setReward] = useState<{ xp: number; certificate: boolean } | null>(null)
+
+  useEffect(() => {
+    if (!aiOpen) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setAiOpen(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [aiOpen])
 
   useEffect(() => {
     if (!lesson) return
     setCode(lesson.starterCode ?? '')
+    // HTML has nothing to run, so the lesson opens on a live preview of the markup.
+    setOutputTab(lesson.language === 'html' ? 'preview' : 'output')
     void startLesson(lesson.id).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id])
 
   async function handleRun() {
     if (!lesson) return
+    if (lesson.language === 'html') { setOutputTab('preview'); return }
     setIsRunning(true)
     setOutputTab('output')
     try {
@@ -111,6 +130,10 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
     )
   }
 
+  const isComplete = lesson.progress.status === 'COMPLETED' || checkResult?.allPassed === true
+  const next = isComplete && curriculum ? lessonAfter(curriculum, slug) : null
+  const isTrackEnd = isComplete && !!curriculum && !next
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-rim-subtle bg-card px-4 py-2.5">
@@ -118,6 +141,25 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
           <ArrowLeft size={18} />
         </Link>
         <span className="truncate font-ui text-sm flex-1 font-semibold text-ink">{lesson.title}</span>
+        {next && (
+          <Link
+            href={`/learn/${track.toLowerCase()}/${next.lesson.slug}`}
+            data-testid="next-lesson"
+            title={next.lesson.title}
+            className="btn-3d flex shrink-0 items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-xs font-semibold text-white"
+          >
+            Next lesson <ArrowRight size={13} />
+          </Link>
+        )}
+        {isTrackEnd && (
+          <Link
+            href={`/learn/${track.toLowerCase()}`}
+            data-testid="track-end"
+            className="btn-3d flex shrink-0 items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-xs font-semibold text-white"
+          >
+            Back to track <ArrowRight size={13} />
+          </Link>
+        )}
         <Link
           href={{
             pathname: '/playground',
@@ -146,7 +188,7 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
       </div>
 
       <div className="flex border-b border-rim-subtle lg:hidden">
-        {(['content', 'editor', 'ai'] as const).map((tab) => (
+        {(['content', 'editor'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setMobileTab(tab)}
@@ -155,13 +197,13 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
               mobileTab === tab ? 'border-brand text-ink' : 'border-transparent text-ghost'
             )}
           >
-            {tab === 'ai' ? 'AI Tutor' : tab}
+            {tab}
           </button>
         ))}
       </div>
 
       <div className="min-h-0 flex-1">
-        <div className="hidden h-full grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,0.9fr)] lg:grid">
+        <div className="hidden h-full grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] lg:grid">
           <div className="overflow-hidden border-r border-rim-subtle">
             <LessonContentPane lesson={lesson} />
           </div>
@@ -174,23 +216,14 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
                 onRun={handleRun}
                 onCheck={handleCheck}
                 onReset={handleReset}
-                onAskForHelp={() => setMobileTab('ai')}
+                onAskForHelp={() => setAiOpen(true)}
                 isRunning={isRunning}
                 isChecking={isChecking}
               />
             </div>
             <div className="min-h-0 flex-1">
-              <LessonOutputPane runResult={runResult} checkResult={checkResult} activeTab={outputTab} onTabChange={setOutputTab} />
+              <LessonOutputPane runResult={runResult} checkResult={checkResult} activeTab={outputTab} onTabChange={setOutputTab} language={lesson.language} code={code} />
             </div>
-          </div>
-          <div className="overflow-hidden">
-            <AiTutorPane
-              lessonId={lesson.id}
-              language={lesson.language}
-              currentCode={code}
-              pendingError={pendingError}
-              onErrorHandled={() => setPendingError(null)}
-            />
           </div>
         </div>
 
@@ -206,26 +239,64 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
                   onRun={handleRun}
                   onCheck={handleCheck}
                   onReset={handleReset}
-                  onAskForHelp={() => setMobileTab('ai')}
+                  onAskForHelp={() => setAiOpen(true)}
                   isRunning={isRunning}
                   isChecking={isChecking}
                 />
               </div>
               <div className="min-h-0 flex-1">
-                <LessonOutputPane runResult={runResult} checkResult={checkResult} activeTab={outputTab} onTabChange={setOutputTab} />
+                <LessonOutputPane runResult={runResult} checkResult={checkResult} activeTab={outputTab} onTabChange={setOutputTab} language={lesson.language} code={code} />
               </div>
             </div>
           )}
-          {mobileTab === 'ai' && (
-            <AiTutorPane
-              lessonId={lesson.id}
-              language={lesson.language}
-              currentCode={code}
-              pendingError={pendingError}
-              onErrorHandled={() => setPendingError(null)}
-            />
-          )}
         </div>
+      </div>
+
+      <button
+        onClick={() => setAiOpen(true)}
+        aria-label="Open AI tutor"
+        data-testid="ai-fab"
+        className={cn(
+          'btn-3d fixed bottom-5 right-5 z-30 flex items-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white shadow-elev-lg transition-opacity',
+          aiOpen && 'pointer-events-none opacity-0'
+        )}
+      >
+        <FeatureIcon name="aiTutor" size={20} /> AI Tutor
+      </button>
+
+      <div className={cn('fixed inset-0 z-40', !aiOpen && 'pointer-events-none')} aria-hidden={!aiOpen}>
+        <button
+          aria-label="Close AI tutor"
+          tabIndex={aiOpen ? 0 : -1}
+          onClick={() => setAiOpen(false)}
+          className={cn('absolute inset-0 cursor-default bg-black/40 transition-opacity', aiOpen ? 'opacity-100' : 'opacity-0')}
+        />
+        <aside
+          role="dialog"
+          aria-label="AI tutor"
+          data-testid="ai-drawer"
+          data-open={aiOpen}
+          className={cn(
+            'absolute right-0 top-0 flex h-full w-full max-w-md flex-col border-l border-rim-subtle bg-canvas shadow-elev-lg transition-transform duration-300',
+            aiOpen ? 'translate-x-0' : 'translate-x-full'
+          )}
+        >
+          <button
+            onClick={() => setAiOpen(false)}
+            aria-label="Close"
+            tabIndex={aiOpen ? 0 : -1}
+            className="absolute right-3 top-3 z-10 rounded-[var(--radius-sm)] p-1.5 text-dim hover:bg-raised hover:text-ink"
+          >
+            <X size={16} />
+          </button>
+          <AiTutorPane
+            lessonId={lesson.id}
+            language={lesson.language}
+            currentCode={code}
+            pendingError={pendingError}
+            onErrorHandled={() => setPendingError(null)}
+          />
+        </aside>
       </div>
 
       <AnimatePresence>
