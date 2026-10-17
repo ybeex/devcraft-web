@@ -66,6 +66,16 @@
   --font-display: 'Playfair Display', Georgia, serif;
   --font-ui:      'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Syntax colors are paired with each active theme for code readability. */
+  --syntax-keyword: #8b5cf6;
+  --syntax-string: #15803d;
+  --syntax-number: #2563eb;
+  --syntax-function: #b45309;
+  --syntax-comment: #8b8178;
+  --syntax-operator: #7c3aed;
+  --syntax-tag: #0e7490;
+  --syntax-attribute: #7e22ce;
 }
 
 [data-theme="dark"] {
@@ -102,6 +112,15 @@
   --glow-rgb:    231, 169, 119;
 
   --font-ui: 'Bricolage Grotesque', sans-serif;
+
+  --syntax-keyword: #c4b5fd;
+  --syntax-string: #86efac;
+  --syntax-number: #93c5fd;
+  --syntax-function: #fdba74;
+  --syntax-comment: #a89b8e;
+  --syntax-operator: #d8b4fe;
+  --syntax-tag: #67e8f9;
+  --syntax-attribute: #d8b4fe;
 }
 
 @theme {
@@ -168,6 +187,15 @@ h1, h2, h3, h4, h5, h6 {
   .text-dim   { color: var(--dim); }
   .text-ghost { color: var(--ghost); }
   .text-brand { color: var(--brand); }
+
+  .syntax-keyword { color: var(--syntax-keyword); }
+  .syntax-string { color: var(--syntax-string); }
+  .syntax-number { color: var(--syntax-number); }
+  .syntax-function { color: var(--syntax-function); }
+  .syntax-comment { color: var(--syntax-comment); font-style: italic; }
+  .syntax-operator { color: var(--syntax-operator); }
+  .syntax-tag { color: var(--syntax-tag); }
+  .syntax-attribute { color: var(--syntax-attribute); }
 
   .shadow-elev-sm { box-shadow: var(--shadow-sm); }
   .shadow-elev-md { box-shadow: var(--shadow-md); }
