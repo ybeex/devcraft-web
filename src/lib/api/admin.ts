@@ -646,6 +646,8 @@ export interface AdminSubmission {
   aiScore: number | null
   aiReviewedAt: string | null
   status: SubmissionStatus
+  reviewFeedback?: string | null
+  reviewedAt?: string | null
   createdAt: string
   updatedAt: string
   user: { username: string; displayName: string; email: string }
