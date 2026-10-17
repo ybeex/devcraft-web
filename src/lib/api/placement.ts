@@ -6,9 +6,11 @@ export interface PlacementQuestion {
   id: string
   prompt: string
   options: string[]
+  /** A snippet to read, on the harder code-reading questions. */
+  code?: string
   /** 1-based position in this check. */
   number: number
-  /** The check is about this long; it can run one longer. */
+  /** The check is about this long; it can run a couple longer. */
   ofAbout: number
 }
 
