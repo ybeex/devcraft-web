@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Github, Globe, Linkedin, ExternalLink, Flame, Trophy } from 'lucide-react'
+import { Globe, ExternalLink, Flame, Trophy } from 'lucide-react'
 import type { PublicPortfolio } from '@/lib/api/portfolio'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { ActivityHeatmap } from './ActivityHeatmap'
@@ -57,7 +57,7 @@ export function PortfolioView({ data }: { data: PublicPortfolio }) {
                 rel="noreferrer"
                 className="flex items-center gap-1.5 rounded-full border border-rim bg-card px-3.5 py-1.5 text-xs font-medium text-dim transition-colors hover:text-ink"
               >
-                <Github size={13} /> GitHub
+                <Globe size={13} /> GitHub
               </a>
             )}
             {portfolio.linkedinUrl && (
@@ -67,7 +67,7 @@ export function PortfolioView({ data }: { data: PublicPortfolio }) {
                 rel="noreferrer"
                 className="flex items-center gap-1.5 rounded-full border border-rim bg-card px-3.5 py-1.5 text-xs font-medium text-dim transition-colors hover:text-ink"
               >
-                <Linkedin size={13} /> LinkedIn
+                <Globe size={13} /> LinkedIn
               </a>
             )}
             {portfolio.websiteUrl && (
@@ -95,7 +95,7 @@ export function PortfolioView({ data }: { data: PublicPortfolio }) {
                 <Link
                   key={cert.id}
                   href={`/cert/${cert.id}`}
-                  className="flex items-center gap-3 rounded-[var(--radius-xl)] border border-rim-subtle bg-card px-4 py-3 shadow-elev-sm transition-shadow hover:shadow-elev-md"
+                  className="flex items-center gap-3 rounded-xl border border-rim-subtle bg-card px-4 py-3 shadow-elev-sm transition-shadow hover:shadow-elev-md"
                 >
                   <FeatureIcon name="certificate" size={36} />
                   <div className="text-left">
@@ -160,7 +160,7 @@ export function PortfolioView({ data }: { data: PublicPortfolio }) {
 
 function StatBlock({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-[var(--radius-lg)] border border-rim-subtle bg-card px-4 py-4 shadow-elev-sm">
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-rim-subtle bg-card px-4 py-4 shadow-elev-sm">
       <span className="flex items-center gap-1 font-display text-xl font-bold text-ink">
         {icon}
         {value}
@@ -172,7 +172,7 @@ function StatBlock({ label, value, icon }: { label: string; value: string; icon?
 
 function PortfolioProjectCard({ project }: { project: PublicPortfolio['projects'][number] }) {
   return (
-    <div className="flex flex-col gap-3 rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-rim-subtle bg-card p-5 shadow-elev-sm">
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-ui text-base font-bold text-ink">{project.title}</h3>
         {project.avgScore !== null && <span className="shrink-0 font-ui text-sm font-bold text-brand">{project.avgScore}/100</span>}
@@ -202,7 +202,7 @@ function PortfolioProjectCard({ project }: { project: PublicPortfolio['projects'
             rel="noreferrer"
             className="flex items-center gap-1.5 text-xs font-medium text-dim hover:text-ink"
           >
-            <Github size={13} /> Code
+            <Globe size={13} /> Code
           </a>
         )}
         {project.liveUrl && (

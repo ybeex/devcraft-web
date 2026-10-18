@@ -1,4 +1,4 @@
-import { ExternalLink, Github } from 'lucide-react'
+import { ExternalLink, GiftIcon } from 'lucide-react'
 import { StatusDot } from '@/components/ui/StatusDot'
 import { AvatarStack } from '@/components/ui/AvatarStack'
 import type { MySubmission } from '@/lib/api/projects'
@@ -35,7 +35,7 @@ export function SubmissionStatusCard({ submission }: { submission: MySubmission 
             rel="noreferrer"
             className="flex items-center gap-1.5 rounded-full border border-rim px-3.5 py-2 text-xs font-medium text-dim transition-colors hover:text-ink"
           >
-            <Github size={13} /> Repository
+            <GiftIcon size={13} /> Repository
           </a>
         )}
         {submission.liveUrl && (
@@ -55,7 +55,7 @@ export function SubmissionStatusCard({ submission }: { submission: MySubmission 
       {submission.reviewFeedback && (
         <div
           data-testid="reviewer-feedback"
-          className={`rounded-[var(--radius-lg)] border p-4 ${submission.status === 'NEEDS_REVISION' ? 'border-warning/40 bg-warning/10' : 'border-success/40 bg-success/10'}`}
+          className={`rounded-lg border p-4 ${submission.status === 'NEEDS_REVISION' ? 'border-warning/40 bg-warning/10' : 'border-success/40 bg-success/10'}`}
         >
           <span className="font-ui text-xs font-semibold uppercase tracking-wide text-dim">
             {submission.status === 'NEEDS_REVISION' ? 'What to change' : 'Reviewer note'}
@@ -66,7 +66,7 @@ export function SubmissionStatusCard({ submission }: { submission: MySubmission 
       )}
 
       {submission.aiReview && (
-        <div className="rounded-[var(--radius-lg)] bg-raised p-4">
+        <div className="rounded-lg bg-raised p-4">
           <div className="flex items-center justify-between">
             <span className="font-ui text-xs font-semibold uppercase tracking-wide text-dim">AI review</span>
             {submission.aiScore !== null && (
