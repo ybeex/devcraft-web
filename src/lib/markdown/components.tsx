@@ -7,6 +7,9 @@ import { SyntaxCode } from './SyntaxCode'
  * any future markdown surface) renders identically rather than drifting.
  */
 export const markdownComponents: Components = {
+  // Fenced blocks render their own frame in `code`; remove react-markdown's
+  // default <pre> wrapper so the frame isn't nested inside invalid markup.
+  pre: ({ children }) => <>{children}</>,
   h1: ({ children }) => <h1 className="font-display mb-3 mt-6 text-2xl font-bold text-ink first:mt-0">{children}</h1>,
   h2: ({ children }) => <h2 className="font-display mb-2.5 mt-6 text-xl font-bold text-ink">{children}</h2>,
   h3: ({ children }) => <h3 className="mb-2 mt-5 font-ui text-base font-bold text-ink">{children}</h3>,
@@ -41,7 +44,7 @@ export const markdownComponents: Components = {
           <span className="h-2 w-2 rounded-full bg-success/60" />
           {language && <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide text-ghost">{language}</span>}
         </div>
-        <pre className="overflow-x-auto bg-card p-4">
+        <pre className="markdown-code-block overflow-x-auto p-4">
           <SyntaxCode code={String(children).replace(/\n$/, '')} language={language} />
         </pre>
       </div>

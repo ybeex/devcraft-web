@@ -31,6 +31,17 @@
   --error:   #ef4444;
   --info:    #3b82f6;
 
+  /* Warm, restrained syntax colors for lesson and AI code blocks. */
+  --code-bg:       #f7f3ee;
+  --code-comment:  #687a70;
+  --code-tag:      #c2413b;
+  --code-attr:     #8653b5;
+  --code-string:   #24734b;
+  --code-number:   #bd5b18;
+  --code-keyword:  #793fc1;
+  --code-function: #1769aa;
+  --code-operator: #bd3f75;
+
   /* Track accents */
   --track-fe: #d97706;
   --track-be: #7c3aed;
@@ -66,16 +77,6 @@
   --font-display: 'Playfair Display', Georgia, serif;
   --font-ui:      'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
-
-  /* Syntax colors are paired with each active theme for code readability. */
-  --syntax-keyword: #8b5cf6;
-  --syntax-string: #15803d;
-  --syntax-number: #2563eb;
-  --syntax-function: #b45309;
-  --syntax-comment: #8b8178;
-  --syntax-operator: #7c3aed;
-  --syntax-tag: #0e7490;
-  --syntax-attribute: #7e22ce;
 }
 
 [data-theme="dark"] {
@@ -93,6 +94,16 @@
   --ink:   #fdfbf7;
   --dim:   #caa894;
   --ghost: #6b5647;
+
+  --code-bg:       #24211f;
+  --code-comment:  #93a397;
+  --code-tag:      #ff8f7b;
+  --code-attr:     #d2a6ff;
+  --code-string:   #a4df9b;
+  --code-number:   #ffc078;
+  --code-keyword:  #d6a3ff;
+  --code-function: #82caff;
+  --code-operator: #ff8ac2;
 
   --track-fe: #f59e0b;
   --track-be: #a78bfa;
@@ -112,15 +123,6 @@
   --glow-rgb:    231, 169, 119;
 
   --font-ui: 'Bricolage Grotesque', sans-serif;
-
-  --syntax-keyword: #c4b5fd;
-  --syntax-string: #86efac;
-  --syntax-number: #93c5fd;
-  --syntax-function: #fdba74;
-  --syntax-comment: #a89b8e;
-  --syntax-operator: #d8b4fe;
-  --syntax-tag: #67e8f9;
-  --syntax-attribute: #d8b4fe;
 }
 
 @theme {
@@ -187,15 +189,6 @@ h1, h2, h3, h4, h5, h6 {
   .text-dim   { color: var(--dim); }
   .text-ghost { color: var(--ghost); }
   .text-brand { color: var(--brand); }
-
-  .syntax-keyword { color: var(--syntax-keyword); }
-  .syntax-string { color: var(--syntax-string); }
-  .syntax-number { color: var(--syntax-number); }
-  .syntax-function { color: var(--syntax-function); }
-  .syntax-comment { color: var(--syntax-comment); font-style: italic; }
-  .syntax-operator { color: var(--syntax-operator); }
-  .syntax-tag { color: var(--syntax-tag); }
-  .syntax-attribute { color: var(--syntax-attribute); }
 
   .shadow-elev-sm { box-shadow: var(--shadow-sm); }
   .shadow-elev-md { box-shadow: var(--shadow-md); }
@@ -285,6 +278,17 @@ h1, h2, h3, h4, h5, h6 {
 
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
 ::selection { background: rgba(178,115,67,.18); color: var(--brand); }
+
+/* Syntax colors used by lesson and AI markdown code blocks. */
+.markdown-code-block { background: var(--code-bg); }
+.syntax-comment { color: var(--code-comment); font-style: italic; }
+.syntax-tag { color: var(--code-tag); }
+.syntax-attribute { color: var(--code-attr); }
+.syntax-string { color: var(--code-string); }
+.syntax-number { color: var(--code-number); }
+.syntax-keyword { color: var(--code-keyword); font-weight: 600; }
+.syntax-function { color: var(--code-function); }
+.syntax-operator { color: var(--code-operator); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
