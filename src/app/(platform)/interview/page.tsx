@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Shuffle } from 'lucide-react'
@@ -24,7 +24,6 @@ import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
 
 const QUESTIONS_PAGE_SIZE = 30
 const MODE_OPTIONS = ['Q&A', 'System design']
-const TRACK_OPTIONS = ['All', 'FE', 'BE']
 const DIFFICULTY_OPTIONS = ['All', 'Beginner', 'Intermediate', 'Advanced']
 
 export default function InterviewPage() {
@@ -32,19 +31,12 @@ export default function InterviewPage() {
   const [mode, setMode] = useState<'Q&A' | 'System design'>('Q&A')
   const myTrack = useAuthStore((s) => s.user?.primaryTrack ?? null)
   const hydrated = useAuthStore((s) => s.hasHydrated)
-  const [trackLabel, setTrackLabel] = useState<string>(myTrack ?? 'All')
-  // Questions open on the learner's own track. The saved session can arrive after the first render, so the
-  // default is applied once it does, and never again after the learner has picked a filter themselves.
-  const trackTouched = useRef(false)
-  useEffect(() => {
-    if (hydrated && myTrack && !trackTouched.current) setTrackLabel(myTrack)
-  }, [hydrated, myTrack])
   const [difficultyLabel, setDifficultyLabel] = useState('All')
   const [sortMode, setSortMode] = useState<'default' | 'random'>('default')
   const [shuffleNonce, setShuffleNonce] = useState(0)
   const [pendingId, setPendingId] = useState<string | null>(null)
 
-  const track = trackLabel === 'All' ? undefined : (trackLabel as 'FE' | 'BE')
+  const track = myTrack ?? undefined
   const difficulty = difficultyLabel === 'All' ? undefined : (difficultyLabel.toUpperCase() as 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED')
 
   // Paged: the API caps a page at 50 and the bank is larger than one page, so keep
@@ -58,7 +50,7 @@ export default function InterviewPage() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['interview-questions', trackLabel, difficultyLabel, sortMode, shuffleNonce],
+    queryKey: ['interview-questions', myTrack, difficultyLabel, sortMode, shuffleNonce],
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       listInterviewQuestions({
@@ -73,7 +65,7 @@ export default function InterviewPage() {
       const loaded = allPages.reduce((n, p) => n + p.questions.length, 0)
       return loaded < lastPage.total && lastPage.questions.length > 0 ? allPages.length + 1 : undefined
     },
-    enabled: mode === 'Q&A',
+    enabled: hydrated && !!myTrack && mode === 'Q&A',
   })
   const questions = pages?.pages.flatMap((p) => p.questions) ?? []
   const totalQuestions = pages?.pages[0]?.total ?? 0
@@ -81,20 +73,20 @@ export default function InterviewPage() {
   const { data: progress } = useQuery({
     queryKey: ['interview-progress'],
     queryFn: getMyInterviewProgress,
-    enabled: mode === 'Q&A',
+    enabled: hydrated && !!myTrack && mode === 'Q&A',
   })
   const progressMap = new Map((progress ?? []).map((p) => [p.questionId, p.status]))
 
   const { data: challengeData, isLoading: areChallengesLoading } = useQuery({
-    queryKey: ['system-design-challenges', trackLabel, difficultyLabel],
+    queryKey: ['system-design-challenges', myTrack, difficultyLabel],
     queryFn: () => listChallenges({ limit: 30, track, difficulty }),
-    enabled: mode === 'System design',
+    enabled: hydrated && !!myTrack && mode === 'System design',
   })
 
   const { data: challengeProgress } = useQuery({
     queryKey: ['system-design-progress'],
     queryFn: getMyChallengeProgress,
-    enabled: mode === 'System design',
+    enabled: hydrated && !!myTrack && mode === 'System design',
   })
   const challengeProgressMap = new Map((challengeProgress ?? []).map((p) => [p.challengeId, p.status]))
 
@@ -132,7 +124,7 @@ export default function InterviewPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={(v) => setMode(v as 'Q&A' | 'System design')} />
-          <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={(v) => { trackTouched.current = true; setTrackLabel(v) }} />
+          {hydrated && myTrack && <span className="rounded-full bg-raised px-3 py-1.5 text-xs font-semibold text-dim">{myTrack === 'FE' ? 'Frontend' : 'Backend'} track</span>}
           <SegmentedControl options={DIFFICULTY_OPTIONS} value={difficultyLabel} onChange={setDifficultyLabel} />
           {mode === 'Q&A' && (
             <div className="flex items-center gap-2">
@@ -149,9 +141,14 @@ export default function InterviewPage() {
         </div>
       </div>
 
-      {mode === 'Q&A' ? (
+      {hydrated && !myTrack ? (
+        <div className="mt-8 rounded-[var(--radius-lg)] border border-rim-subtle bg-card p-6 text-center">
+          <p className="font-semibold text-ink">Choose a learning track to see interview prep</p>
+          <p className="mt-1 text-sm text-dim">Select Frontend or Backend in your profile to load matching questions and system design challenges.</p>
+        </div>
+      ) : mode === 'Q&A' ? (
         <>
-          {isLoading && (
+          {(!hydrated || isLoading) && (
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="h-44 rounded-[var(--radius-xl)]" />
@@ -192,7 +189,7 @@ export default function InterviewPage() {
         </>
       ) : (
         <>
-          {areChallengesLoading && (
+          {(!hydrated || areChallengesLoading) && (
             <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Skeleton key={i} className="h-40 rounded-[var(--radius-xl)]" />
