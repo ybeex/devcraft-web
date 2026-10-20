@@ -141,18 +141,35 @@ const CONSOLE_BRIDGE_SCRIPT = `
 (function() {
   function serialize(arg) {
     if (typeof arg === 'string') return arg
-    try { return JSON.stringify(arg) } catch (e) { return String(arg) }
+    if (arg instanceof Error) return arg.stack || (arg.name + ': ' + arg.message)
+    if (typeof arg === 'undefined') return 'undefined'
+    var seen = new WeakSet()
+    try {
+      var text = JSON.stringify(arg, function(key, value) {
+        if (typeof value === 'bigint') return String(value) + 'n'
+        if (typeof value === 'function') return '[Function ' + (value.name || 'anonymous') + ']'
+        if (value && typeof value === 'object') {
+          if (seen.has(value)) return '[Circular]'
+          seen.add(value)
+        }
+        return value
+      }, 2)
+      return text === undefined ? String(arg) : text
+    } catch (e) { return String(arg) }
   }
   function send(level, args) {
     try {
-      window.parent.postMessage({ __devcraftConsole: true, level: level, message: args.map(serialize).join(' ') }, '*')
+      var message = args.map(serialize).join(' ')
+      if (message.length > 20000) message = message.slice(0, 20000) + ' … [truncated]'
+      window.parent.postMessage({ __devcraftConsole: true, level: level, message: message }, '*')
     } catch (e) {}
   }
   ['log', 'warn', 'error', 'info'].forEach(function(level) {
     var original = console[level]
     console[level] = function() {
-      send(level, Array.prototype.slice.call(arguments))
-      original.apply(console, arguments)
+      var args = Array.prototype.slice.call(arguments)
+      send(level, args)
+      try { if (typeof original === 'function') original.apply(console, args) } catch (e) {}
     }
   })
   window.addEventListener('error', function(e) {
