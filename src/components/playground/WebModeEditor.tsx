@@ -168,7 +168,7 @@ export function WebModeEditor({ value, onChange, theme, previewDoc: providedPrev
         <p className="text-ghost">console.log and errors from your script show up here — not just in devtools.</p>
       ) : (
         logs.map((line, index) => (
-          <p key={`${line.id}-${index}`} className={cn('whitespace-pre-wrap break-words', LEVEL_STYLE[line.level])}>
+          <p key={`${line.id}-${index}`} className={cn('whitespace-pre-wrap wrap-break-words', LEVEL_STYLE[line.level])}>
             {line.message}
           </p>
         ))
