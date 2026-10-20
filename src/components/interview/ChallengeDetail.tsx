@@ -19,6 +19,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { ApiRequestError } from '@/lib/api/client'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/stores/auth-store'
 
 const DIFFICULTY_STYLE: Record<string, string> = {
   BEGINNER: 'bg-[var(--positive-bg)] text-[var(--positive-text)]',
@@ -28,6 +29,8 @@ const DIFFICULTY_STYLE: Record<string, string> = {
 
 export function ChallengeDetail({ slug }: { slug: string }) {
   const queryClient = useQueryClient()
+  const myTrack = useAuthStore((s) => s.user?.primaryTrack ?? null)
+  const hydrated = useAuthStore((s) => s.hasHydrated)
   const [statusPending, setStatusPending] = useState(false)
   const [revealed, setRevealed] = useState<Record<string, boolean>>({})
 
@@ -36,14 +39,16 @@ export function ChallengeDetail({ slug }: { slug: string }) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['system-design-challenge', slug],
+    queryKey: ['system-design-challenge', myTrack, slug],
     queryFn: () => getChallenge(slug),
+    enabled: hydrated && !!myTrack,
     retry: (count, err) => !(err instanceof ApiRequestError && err.statusCode === 404) && count < 2,
   })
 
   const { data: progress } = useQuery({
     queryKey: ['system-design-progress'],
     queryFn: getMyChallengeProgress,
+    enabled: hydrated && !!myTrack,
   })
   const status = challenge ? progress?.find((p) => p.challengeId === challenge.id)?.status : undefined
 
@@ -62,7 +67,7 @@ export function ChallengeDetail({ slug }: { slug: string }) {
     }
   }
 
-  if (isLoading) {
+  if (!hydrated || (myTrack && isLoading)) {
     return (
       <div className="mx-auto max-w-3xl px-5 py-8 sm:px-8">
         <Skeleton className="h-5 w-24" />
@@ -70,6 +75,10 @@ export function ChallengeDetail({ slug }: { slug: string }) {
         <Skeleton className="mt-4 h-40 w-full" />
       </div>
     )
+  }
+
+  if (!myTrack) {
+    return <div className="mx-auto max-w-3xl px-5 py-20 text-center text-sm text-dim">Choose Frontend or Backend in your profile to view matching system design challenges.</div>
   }
 
   if (error) {
@@ -82,6 +91,7 @@ export function ChallengeDetail({ slug }: { slug: string }) {
   }
 
   if (!challenge) return null
+  if (challenge.track !== myTrack) notFound()
 
   const trackColor = challenge.track === 'FE' ? 'var(--track-fe)' : 'var(--track-be)'
 

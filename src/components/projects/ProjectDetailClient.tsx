@@ -28,6 +28,8 @@ const DIFFICULTY_STYLE: Record<string, string> = {
 export function ProjectDetailClient({ id }: { id: string }) {
   const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
+  const hydrated = useAuthStore((s) => s.hasHydrated)
+  const myTrack = user?.primaryTrack ?? null
   const [justSubmitted, setJustSubmitted] = useState(false)
 
   const {
@@ -35,14 +37,16 @@ export function ProjectDetailClient({ id }: { id: string }) {
     isLoading: projectLoading,
     error: projectError,
   } = useQuery({
-    queryKey: ['project', id],
+    queryKey: ['project', myTrack, id],
     queryFn: () => getProject(id),
+    enabled: hydrated && !!myTrack,
     retry: (count, err) => !(err instanceof ApiRequestError && err.statusCode === 404) && count < 2,
   })
 
   const { data: submissions, isLoading: submissionsLoading } = useQuery({
     queryKey: ['my-submissions'],
     queryFn: getMySubmissions,
+    enabled: hydrated && !!myTrack,
   })
 
   const mySubmission = useMemo(
@@ -50,7 +54,7 @@ export function ProjectDetailClient({ id }: { id: string }) {
     [submissions, id]
   )
 
-  if (projectLoading || submissionsLoading) {
+  if (!hydrated || (myTrack && (projectLoading || submissionsLoading))) {
     return (
       <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8">
         <Skeleton className="h-5 w-24" />
@@ -59,6 +63,10 @@ export function ProjectDetailClient({ id }: { id: string }) {
         <Skeleton className="mt-6 h-56 w-full rounded-[var(--radius-xl)]" />
       </div>
     )
+  }
+
+  if (!myTrack) {
+    return <div className="mx-auto max-w-4xl px-5 py-20 text-center text-sm text-dim">Choose Frontend or Backend in your profile to view matching projects.</div>
   }
 
   if (projectError) {
@@ -71,6 +79,7 @@ export function ProjectDetailClient({ id }: { id: string }) {
   }
 
   if (!project) return null
+  if (project.module?.track.slug !== myTrack) notFound()
 
   const tierLocked = project.isPremium && user?.tier === 'FREE'
 
