@@ -30,6 +30,8 @@ export interface RunResult {
   exitCode: number | null
   status: string
   timedOut: boolean
+  /** Database lessons: the rows the learner's statement returned. */
+  table?: { command: string; columns: string[]; rows: unknown[][]; rowCount: number; truncated: boolean }
 }
 
 export interface CheckResult {

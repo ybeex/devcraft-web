@@ -18,6 +18,8 @@ const LANGUAGE_OPTIONS = [
   { value: 'typescript', label: 'TypeScript' },
   { value: 'python', label: 'Python' },
   { value: 'sql', label: 'SQL (native — runs against real SQLite)' },
+  { value: 'nodejs-db', label: 'JavaScript + practice database (db.query — Pro)' },
+  { value: 'postgresql', label: 'PostgreSQL (learner\'s practice database — Pro)' },
 ]
 
 /**
@@ -33,6 +35,12 @@ const LANGUAGE_OPTIONS = [
 function languageEngineNote(language: string): string | null {
   if (language === 'sql') {
     return 'Runs as real SQL against SQLite (Judge0). Best for "write a query" exercises: have the learner finish a CREATE VIEW <name> AS <query>, then have testCode assert against that view — e.g. SELECT CASE WHEN (SELECT COUNT(*) FROM <name>) = 2 THEN \'PASS ...\' ELSE \'FAIL ...\' END;. See the Joins & Aggregates lesson (be-sql) for a full working example.'
+  }
+  if (language === 'nodejs-db') {
+    return 'JavaScript that runs in an isolated sandbox with one extra global, `db.query(sql, params)`, bound to the learner\'s practice database (resolves to { rows, rowCount, command, fields }). Every Run and Check happens in a transaction that is rolled back. testCode prints PASS/FAIL lines like other JS lessons and can use top-level await and db directly; pass a counting wrapper to the learner\'s function to assert how many queries it makes. Pro learners only, so mark the lesson Premium.'
+  }
+  if (language === 'postgresql') {
+    return 'Runs on the learner\'s own copy of the DevCraft Shop (PostgreSQL). Run keeps the change; Check runs the statement in a transaction that is rolled back. testCode uses test()/expect() with `result` (the learner\'s rows as objects: result.columns, result.rows, result.rowCount) and `await query("SELECT …")` to inspect the effect of DDL/DML, e.g. an index or a changed row. Pro learners only, so mark the lesson Premium.'
   }
   if (language === 'javascript') {
     return 'For topics where the real engine (e.g. a live database, a running server) isn\'t practical to stand up for grading, or the exercise is really a decision/classification task rather than "write a query," JavaScript can simulate the underlying logic instead — see the Schema Design and Indexes & EXPLAIN lessons (be-sql) or REST API Design (be-rest-apis) for this pattern.'

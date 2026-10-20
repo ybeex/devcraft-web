@@ -4,6 +4,10 @@ import Editor from '@monaco-editor/react'
 import { useTheme } from 'next-themes'
 import { Play, CheckCircle, RotateCcw, HelpCircle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { WebModeEditor } from '@/components/playground/WebModeEditor'
+import type { WebBottomTab, WebEditorTab } from '@/components/playground/WebModeEditor'
+import type { WebModeContent } from '@/lib/api/playground'
+import type { ReactNode } from 'react'
 
 interface LessonEditorPaneProps {
   code: string
@@ -15,6 +19,19 @@ interface LessonEditorPaneProps {
   onAskForHelp: () => void
   isRunning: boolean
   isChecking: boolean
+  webContent?: WebModeContent
+  onWebContentChange?: (value: WebModeContent) => void
+  webPreviewDoc?: string
+  webPreviewSandbox?: string
+  webPreviewKey?: number
+  webPanelRevealKey?: number
+  webPreviewLoading?: boolean
+  webLayout?: 'split' | 'stacked'
+  webTestsPanel?: ReactNode
+  webTestsBadge?: string
+  webActivePanel?: WebBottomTab
+  onWebPanelChange?: (panel: WebBottomTab) => void
+  onWebEditorTabChange?: (tab: WebEditorTab) => void
 }
 
 export function LessonEditorPane({
@@ -27,6 +44,19 @@ export function LessonEditorPane({
   onAskForHelp,
   isRunning,
   isChecking,
+  webContent,
+  onWebContentChange,
+  webPreviewDoc,
+  webPreviewSandbox,
+  webPreviewKey,
+  webPanelRevealKey,
+  webPreviewLoading,
+  webLayout,
+  webTestsPanel,
+  webTestsBadge,
+  webActivePanel,
+  onWebPanelChange,
+  onWebEditorTabChange,
 }: LessonEditorPaneProps) {
   const { resolvedTheme } = useTheme()
 
@@ -54,9 +84,26 @@ export function LessonEditorPane({
       </div>
 
       <div className="min-h-0 flex-1">
-        <Editor
+        {webContent && onWebContentChange ? (
+          <WebModeEditor
+            value={webContent}
+            onChange={onWebContentChange}
+            theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
+            previewDoc={webPreviewDoc}
+            previewSandbox={webPreviewSandbox}
+            previewKey={webPreviewKey}
+            panelRevealKey={webPanelRevealKey}
+            previewLoading={webPreviewLoading}
+            layout={webLayout}
+            testsPanel={webTestsPanel}
+            testsBadge={webTestsBadge}
+            activePanel={webActivePanel}
+            onActivePanelChange={onWebPanelChange}
+            onActiveEditorTabChange={onWebEditorTabChange}
+          />
+        ) : <Editor
           value={code}
-          language={language}
+          language={language === 'postgresql' ? 'sql' : language === 'nodejs-db' ? 'javascript' : language === 'webapp' ? 'html' : language}
           theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
           onChange={(value) => onChange(value ?? '')}
           options={{
@@ -68,7 +115,7 @@ export function LessonEditorPane({
             automaticLayout: true,
             tabSize: 2,
           }}
-        />
+        />}
       </div>
     </div>
   )
