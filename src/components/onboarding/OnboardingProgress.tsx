@@ -17,7 +17,7 @@ export function OnboardingProgress({ step, total }: OnboardingProgressProps) {
           className="h-1.5 rounded-full"
           animate={{
             width: i === step ? 32 : 8,
-            backgroundColor: i <= step ? '#fdfbf7' : 'rgba(255,255,255,0.4)',
+            backgroundColor: i <= step ? '#F7F5F2' : 'rgba(255,255,255,0.4)',
           }}
           transition={{ duration: 0.3, ease: easeOut }}
         />

@@ -14,13 +14,10 @@ import {
 } from '@/lib/api/notifications'
 import { getMessage, getLink, timeAgo } from '@/lib/utils/notification-format'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { ProfileMenu } from './ProfileMenu'
 import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
-
-function initials(name: string): string {
-  return name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
-}
 
 export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   const router = useRouter()
@@ -334,21 +331,7 @@ export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
           </AnimatePresence>
         </div>
 
-        {/* Avatar */}
-        {user && (
-          <Link
-            href="/profile"
-            aria-label="Your profile"
-            className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-muted text-xs font-bold text-brand"
-          >
-            {user.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.displayName} className="h-full w-full object-cover" />
-            ) : (
-              initials(user.displayName)
-            )}
-          </Link>
-        )}
+        <ProfileMenu />
       </div>
     </header>
   )

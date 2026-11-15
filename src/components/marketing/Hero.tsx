@@ -112,13 +112,13 @@ export function Hero() {
           initial={{ opacity: 0, y: 24, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.9, ease: easeOut }}
-          className="mt-16 w-full max-w-2xl overflow-hidden rounded-[var(--radius-lg)] border border-rim-subtle bg-[#221e17] text-left shadow-elev-lg"
+          className="mt-16 w-full max-w-2xl overflow-hidden rounded-[var(--radius-lg)] border border-rim-subtle bg-[#151E32] text-left shadow-elev-lg"
         >
-          <div className="flex items-center gap-1.5 border-b border-white/10 bg-[#2e271d] px-4 py-3">
+          <div className="flex items-center gap-1.5 border-b border-white/10 bg-[#202B40] px-4 py-3">
             <span className="h-2.5 w-2.5 rounded-full bg-error" />
             <span className="h-2.5 w-2.5 rounded-full bg-warning" />
             <span className="h-2.5 w-2.5 rounded-full bg-success" />
-            <span className="ml-3 font-mono text-xs text-[#caa894]">
+            <span className="ml-3 font-mono text-xs text-[#C8CBD4]">
               {SNIPPETS[snippetIndex]!.lang === 'tsx' ? 'useDebounce.ts' : 'auth.routes.ts'}
             </span>
           </div>
@@ -127,7 +127,7 @@ export function Hero() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-[#fdfbf7]"
+            className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-[#F7F5F2]"
           >
             <code>{SNIPPETS[snippetIndex]!.code}</code>
           </motion.pre>

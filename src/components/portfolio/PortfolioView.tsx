@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Globe, ExternalLink, Flame, Trophy } from 'lucide-react'
+import { Github, Globe, Linkedin, ExternalLink, Flame, Trophy } from 'lucide-react'
 import type { PublicPortfolio } from '@/lib/api/portfolio'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { ActivityHeatmap } from './ActivityHeatmap'
@@ -57,7 +57,7 @@ export function PortfolioView({ data }: { data: PublicPortfolio }) {
                 rel="noreferrer"
                 className="flex items-center gap-1.5 rounded-full border border-rim bg-card px-3.5 py-1.5 text-xs font-medium text-dim transition-colors hover:text-ink"
               >
-                <Globe size={13} /> GitHub
+                <Github size={13} /> GitHub
               </a>
             )}
             {portfolio.linkedinUrl && (
@@ -67,7 +67,7 @@ export function PortfolioView({ data }: { data: PublicPortfolio }) {
                 rel="noreferrer"
                 className="flex items-center gap-1.5 rounded-full border border-rim bg-card px-3.5 py-1.5 text-xs font-medium text-dim transition-colors hover:text-ink"
               >
-                <Globe size={13} /> LinkedIn
+                <Linkedin size={13} /> LinkedIn
               </a>
             )}
             {portfolio.websiteUrl && (
@@ -202,7 +202,7 @@ function PortfolioProjectCard({ project }: { project: PublicPortfolio['projects'
             rel="noreferrer"
             className="flex items-center gap-1.5 text-xs font-medium text-dim hover:text-ink"
           >
-            <Globe size={13} /> Code
+            <Github size={13} /> Code
           </a>
         )}
         {project.liveUrl && (
