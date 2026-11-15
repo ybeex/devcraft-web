@@ -10,6 +10,7 @@ import {
   deleteAdminStage,
   type SystemDesignStage,
 } from '@/lib/api/admin'
+import { ImageUpload } from '@/components/ui/ImageUpload'
 import { TextField, TextAreaField, NumberField, TagsField } from './FormFields'
 import { useContentSave } from './useContentSave'
 import { Button } from '@/components/ui/Button'
@@ -142,7 +143,7 @@ function StageEditForm({ stage, onDone, onSaved }: { stage: SystemDesignStage; o
       </div>
       <TagsField label="Guiding questions" value={guidingQuestions} onChange={setGuidingQuestions} placeholder="Add a question, press Enter" />
       <TextAreaField label="Model answer" value={modelAnswer} onChange={setModelAnswer} rows={6} hint="Markdown — the reveal content for this stage" />
-      <TextField label="Diagram image URL (optional)" value={diagramImageUrl} onChange={setDiagramImageUrl} placeholder="https://…" />
+      <ImageUpload label="Diagram image (optional)" kind="diagram" value={diagramImageUrl || null} onChange={(u) => setDiagramImageUrl(u ?? '')} />
 
       {error && <p className="text-xs font-medium text-error">{error}</p>}
 
@@ -155,7 +156,7 @@ function StageEditForm({ stage, onDone, onSaved }: { stage: SystemDesignStage; o
           disabled={isSaving}
           onClick={() =>
             save(
-              () => updateAdminStage(stage.id, { title, order, guidingQuestions, modelAnswer, diagramImageUrl: diagramImageUrl || undefined }),
+              () => updateAdminStage(stage.id, { title, order, guidingQuestions, modelAnswer, diagramImageUrl: diagramImageUrl || null }),
               () => {
                 onSaved()
                 onDone()
@@ -198,7 +199,7 @@ function StageCreateForm({
       </div>
       <TagsField label="Guiding questions" value={guidingQuestions} onChange={setGuidingQuestions} placeholder="Add a question, press Enter" />
       <TextAreaField label="Model answer" value={modelAnswer} onChange={setModelAnswer} rows={6} hint="Markdown — at least 30 characters" />
-      <TextField label="Diagram image URL (optional)" value={diagramImageUrl} onChange={setDiagramImageUrl} placeholder="https://…" />
+      <ImageUpload label="Diagram image (optional)" kind="diagram" value={diagramImageUrl || null} onChange={(u) => setDiagramImageUrl(u ?? '')} />
 
       {error && <p className="text-xs font-medium text-error">{error}</p>}
 

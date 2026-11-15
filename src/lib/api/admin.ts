@@ -802,7 +802,7 @@ export interface CreateStageInput {
   title: string
   guidingQuestions?: string[]
   modelAnswer: string
-  diagramImageUrl?: string
+  diagramImageUrl?: string | null
 }
 
 export function createAdminStage(body: CreateStageInput): Promise<SystemDesignStage> {
@@ -814,7 +814,7 @@ export interface UpdateStageInput {
   title?: string
   guidingQuestions?: string[]
   modelAnswer?: string
-  diagramImageUrl?: string
+  diagramImageUrl?: string | null
 }
 
 export function updateAdminStage(id: string, body: UpdateStageInput): Promise<SystemDesignStage> {

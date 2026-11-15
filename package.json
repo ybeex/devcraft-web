@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
-    "build": "next build",
+    "build": "npm run build:lesson-runtime && next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build:lesson-runtime": "node scripts/build-lesson-runtime.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -36,11 +37,17 @@
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
     "autoprefixer": "^10.4.21",
+    "esbuild": "^0.28.2",
     "postcss": "^8.5.3",
+    "sucrase": "^3.35.1",
     "tailwindcss": "^4.3.2",
     "typescript": "^5.8.3"
   },
   "notes": {
     "tanstack-table": "Intentionally NOT installed — user will add @tanstack/react-table themselves. Table components in this codebase are written against its v8 API shape (columnHelper, getCoreRowModel, flexRender) so it drops in with zero refactor once installed."
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "sharp@0.34.5": true
   }
 }

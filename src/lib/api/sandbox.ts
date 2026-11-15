@@ -1,4 +1,5 @@
 import { authFetch } from './auth-fetch'
+import { userFacingApiMessage } from './client'
 
 export interface SandboxColumn { name: string; type: string; nullable: boolean; primaryKey: boolean; references?: string | null }
 export interface SandboxTable { name: string; rows: number; columns: SandboxColumn[] }
@@ -22,8 +23,7 @@ export async function downloadSandboxExport(): Promise<void> {
   const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1'
   const res = await fetch(`${base}/sandbox/export`, { headers: { Authorization: `Bearer ${useAuthStore.getState().accessToken ?? ''}` }, credentials: 'include' })
   if (!res.ok) {
-    const body = await res.json().catch(() => null) as { error?: { message?: string } } | null
-    throw new Error(body?.error?.message ?? 'Could not export your database. Try again.')
+    throw new Error(userFacingApiMessage(res.status))
   }
   const url = URL.createObjectURL(await res.blob())
   const a = document.createElement('a')

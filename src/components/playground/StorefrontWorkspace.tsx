@@ -118,7 +118,7 @@ export function StorefrontWorkspace() {
               <p className="mt-2 text-xs text-dim">Demo login: <code className="font-mono">{info.demo_account?.email}</code> / <code className="font-mono">{info.demo_account?.password}</code>. Declined card: <code className="font-mono">{info.declined_card}</code>.</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button size="sm" variant="outline" onClick={reset} disabled={resetting}><RotateCcw size={13} /> Reset my shop</Button>
-                <Link href="/playground/previews"><Button size="sm" variant="outline"><Globe size={13} /> My previews</Button></Link>
+                <Link href="/labs/previews"><Button size="sm" variant="outline"><Globe size={13} /> My previews</Button></Link>
               </div>
             </>
           ) : (

@@ -5,13 +5,14 @@ import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { linkVertical } from 'd3'
 import { ModuleNode } from './ModuleNode'
+import { ComingSoonNode } from './ComingSoonNode'
 import { LessonRow } from './LessonRow'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { getTrackCurriculum } from '@/lib/api/curriculum'
 import { getBulkLessonStatus } from '@/lib/api/progress'
-import { computeModuleStates, computeLessonStates } from '@/lib/utils/curriculum-tree'
+import { computeModuleStates, computeLessonStates, buildTreeItems } from '@/lib/utils/curriculum-tree'
 import { cascadeItem } from '@/lib/motion/variants'
 
 interface ConnectorPath {
@@ -39,6 +40,8 @@ export function CurriculumTree({ track }: { track: 'FE' | 'BE' }) {
     () => (curriculum && statuses ? computeModuleStates(curriculum.modules, statuses) : []),
     [curriculum, statuses],
   )
+  // Available modules with the "coming soon" ones placed where the learning path puts them.
+  const items = useMemo(() => buildTreeItems(moduleStates, curriculum?.comingSoon ?? []), [moduleStates, curriculum])
 
   const toggleModule = useCallback((id: string) => {
     setExpandedIds((prev) => {
@@ -55,7 +58,7 @@ export function CurriculumTree({ track }: { track: 'FE' | 'BE' }) {
   // Recomputed whenever the expanded set changes, since expanding a module
   // shifts every card below it.
   useLayoutEffect(() => {
-    if (!containerRef.current || moduleStates.length < 2) {
+    if (!containerRef.current || items.length < 2) {
       setConnectors((current) => (current.length === 0 ? current : []))
       return
     }
@@ -70,13 +73,12 @@ export function CurriculumTree({ track }: { track: 'FE' | 'BE' }) {
       .y((d) => d.y)
 
     const paths: ConnectorPath[] = []
-    for (let i = 0; i < moduleStates.length - 1; i++) {
-      const currentMod = moduleStates[i]
-      const nextMod = moduleStates[i + 1]
-      if (!currentMod || !nextMod) continue
-
-      const currentEl = nodeRefs.current.get(currentMod.module.id)
-      const nextEl = nodeRefs.current.get(nextMod.module.id)
+    for (let i = 0; i < items.length - 1; i++) {
+      const currentItem = items[i]
+      const nextItem = items[i + 1]
+      if (!currentItem || !nextItem) continue
+      const currentEl = nodeRefs.current.get(currentItem.key)
+      const nextEl = nodeRefs.current.get(nextItem.key)
       if (!currentEl || !nextEl) continue
 
       const currentRect = currentEl.getBoundingClientRect()
@@ -92,93 +94,109 @@ export function CurriculumTree({ track }: { track: 'FE' | 'BE' }) {
       }
 
       const d = generator({ source, target })
-      if (d) paths.push({ d, completed: currentMod.state === 'completed' })
+      if (d) paths.push({ d, completed: currentItem.type === 'module' && currentItem.data.state === 'completed' })
     }
 
     setConnectors(paths)
-  }, [moduleStates, expandedIds])
+  }, [items, expandedIds])
 
   if (loadingCurriculum || loadingStatuses) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 px-5 py-10">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-[var(--radius-xl)]" />
-        ))}
+      <div className="h-full overflow-y-auto">
+        <div className="mx-auto flex max-w-2xl flex-col gap-4 px-5 py-10">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-[var(--radius-xl)]" />
+          ))}
+        </div>
       </div>
     )
   }
 
   if (!curriculum || moduleStates.length === 0) {
     return (
-      <div className="mx-auto max-w-2xl px-5 py-10">
-        <EmptyState
-          icon={<FeatureIcon name={track === 'BE' ? 'trackBe' : 'trackFe'} size={56} achieved={false} />}
-          headline="Curriculum coming soon"
-          body="This track's modules haven't been published yet — check back shortly."
-        />
+      <div className="h-full overflow-y-auto">
+        <div className="mx-auto max-w-2xl px-5 py-10">
+          <EmptyState
+            icon={<FeatureIcon name={track === 'BE' ? 'trackBe' : 'trackFe'} size={56} achieved={false} />}
+            headline="Curriculum coming soon"
+            body="This track's modules haven't been published yet — check back shortly."
+          />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-10">
-      <header className="mb-8 text-center">
-        <FeatureIcon name={track === 'BE' ? 'trackBe' : 'trackFe'} size={56} className="mx-auto" />
-        <h1 className="font-display mt-4 text-3xl font-bold text-ink">{curriculum.name}</h1>
-        <p className="mt-2 text-dim">{curriculum.description}</p>
-      </header>
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto max-w-2xl px-5 py-10">
+        <header className="mb-8 text-center">
+          <FeatureIcon name={track === 'BE' ? 'trackBe' : 'trackFe'} size={56} className="mx-auto" />
+          <h1 className="font-display mt-4 text-3xl font-bold text-ink">{curriculum.name}</h1>
+          <p className="mt-2 text-dim">{curriculum.description}</p>
+          {curriculum.path && (
+            <p className="mt-3 text-sm text-dim" data-testid="path-summary">
+              You are following <span className="font-semibold text-ink">{curriculum.path.title}</span>.{' '}
+              {moduleStates.length} modules are available now
+              {(curriculum.comingSoon?.length ?? 0) > 0 ? `, and ${curriculum.comingSoon!.length} more are coming soon.` : '.'}
+            </p>
+          )}
+        </header>
 
-      <div ref={containerRef} className="relative">
-        {/* Connector lines — SVG overlay behind the cards */}
-        <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden>
-          {connectors.map((c, i) => (
-            <path
-              key={i}
-              d={c.d}
-              fill="none"
-              className={c.completed ? 'node-line node-line--completed' : 'node-line'}
-            />
-          ))}
-        </svg>
+        <div ref={containerRef} className="relative">
+          {/* Connector lines — SVG overlay behind the cards */}
+          <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+            {connectors.map((c, i) => (
+              <path
+                key={i}
+                d={c.d}
+                fill="none"
+                className={c.completed ? 'node-line node-line--completed' : 'node-line'}
+              />
+            ))}
+          </svg>
 
-        <div className="relative flex flex-col gap-4">
-          {moduleStates.map((modData) => {
-            const isExpanded = expandedIds.has(modData.module.id)
-            const lessonStates = computeLessonStates(modData.module, modData.state, statuses ?? [])
+          <div className="relative flex flex-col gap-4">
+            {items.map((item) => {
+              const setRef = (el: HTMLDivElement | null) => {
+                if (el) nodeRefs.current.set(item.key, el)
+                else nodeRefs.current.delete(item.key)
+              }
+              if (item.type === 'coming-soon') {
+                return (
+                  <motion.div key={item.key} variants={cascadeItem} initial="initial" animate="animate" ref={setRef}>
+                    <ComingSoonNode module={item.module} />
+                  </motion.div>
+                )
+              }
+              const modData = item.data
+              const isExpanded = expandedIds.has(modData.module.id)
+              const lessonStates = computeLessonStates(modData.module, modData.state, statuses ?? [])
 
-            return (
-              <motion.div
-                key={modData.module.id}
-                variants={cascadeItem}
-                initial="initial"
-                animate="animate"
-                ref={(el) => {
-                  if (el) nodeRefs.current.set(modData.module.id, el)
-                  else nodeRefs.current.delete(modData.module.id)
-                }}
-              >
-                <ModuleNode data={modData} isExpanded={isExpanded} onToggle={() => toggleModule(modData.module.id)} />
+              return (
+                <motion.div key={item.key} variants={cascadeItem} initial="initial" animate="animate" ref={setRef}>
+                  <ModuleNode data={modData} isExpanded={isExpanded} onToggle={() => toggleModule(modData.module.id)} />
 
-                <AnimatePresence initial={false}>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: 'easeOut' }}
-                      className="overflow-hidden"
-                    >
-                      <div className="ml-4 mt-2 flex flex-col gap-0.5 border-l border-rim-subtle pl-4">
-                        {lessonStates.map((lessonData) => (
-                          <LessonRow key={lessonData.lesson.id} data={lessonData} trackSlug={track} />
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )
-          })}
+                  <AnimatePresence initial={false}>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="ml-4 mt-2 flex flex-col gap-0.5 border-l border-rim-subtle pl-4">
+                          {lessonStates.map((lessonData) => (
+                            <LessonRow key={lessonData.lesson.id} data={lessonData} trackSlug={track} />
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>
