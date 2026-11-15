@@ -97,13 +97,13 @@ function BlockRenderer({ block }: { block: BlogBlock }) {
       return (
         <div className="overflow-hidden rounded-[var(--radius-md)] border border-rim-subtle shadow-elev-sm">
           {/* Code-block chrome — reuses the icon-code-window 3-dot pattern */}
-          <div className="flex items-center gap-1.5 bg-[#221e17] px-4 py-2.5">
+          <div className="flex items-center gap-1.5 bg-[#151E32] px-4 py-2.5">
             <span className="h-2.5 w-2.5 rounded-full bg-error" />
             <span className="h-2.5 w-2.5 rounded-full bg-warning" />
             <span className="h-2.5 w-2.5 rounded-full bg-success" />
-            <span className="ml-2 font-mono text-[11px] text-[#caa894]">{block.language}</span>
+            <span className="ml-2 font-mono text-[11px] text-[#C8CBD4]">{block.language}</span>
           </div>
-          <pre className="overflow-x-auto bg-[#110f0c] p-4 font-mono text-[13px] leading-relaxed text-[#fdfbf7]">
+          <pre className="overflow-x-auto bg-[#080D1C] p-4 font-mono text-[13px] leading-relaxed text-[#F7F5F2]">
             <code>{block.code}</code>
           </pre>
         </div>

@@ -5,9 +5,8 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard, BookOpen, FolderKanban, Code2,
-  MessagesSquare, Sparkles, LogOut, User, Users, Trophy, PanelLeftClose, PanelLeftOpen, ShieldCheck,
+  MessagesSquare, Sparkles, FlaskConical, ClipboardList, Users, Trophy, PanelLeftClose, PanelLeftOpen, ShieldCheck,
 } from 'lucide-react'
-import { useLogout } from '@/lib/hooks/useLogout'
 import { DevCraftMark } from '@/components/brand/DevCraftMark'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { useAuthStore } from '@/stores/auth-store'
@@ -24,6 +23,8 @@ function buildNavItems(primaryTrack: 'FE' | 'BE' | null): NavItem[] {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: primaryTrack === 'BE' ? '/learn/be' : '/learn/fe', label: 'My Track', icon: BookOpen },
     { href: '/projects', label: 'Projects', icon: FolderKanban },
+    { href: '/my-projects', label: 'My projects', icon: ClipboardList },
+    { href: '/labs', label: 'Labs', icon: FlaskConical },
     { href: '/playground', label: 'Playground', icon: Code2 },
     { href: '/interview', label: 'Interview Prep', icon: MessagesSquare },
     { href: '/community', label: 'Community', icon: Users },
@@ -40,7 +41,6 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarProps) {
-  const { logout, busy: loggingOut } = useLogout()
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
 
@@ -132,37 +132,8 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
         )}
       </nav>
 
-      {/* Footer: portfolio link + XP/streak */}
+      {/* Footer: XP/streak */}
       <div className="border-t border-rim-subtle p-3">
-        {user && (
-          <Link
-            href={`/p/${user.username}`}
-            onClick={onNavigate}
-            className={cn(
-              'mb-2 flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium text-dim transition-colors hover:bg-raised hover:text-ink',
-              collapsed && 'justify-center px-0'
-            )}
-            title={collapsed ? 'Portfolio' : undefined}
-          >
-            <User size={19} />
-            {!collapsed && <span>Portfolio</span>}
-          </Link>
-        )}
-
-        <button
-          type="button"
-          onClick={() => void logout()}
-          disabled={loggingOut}
-          className={cn(
-            'mb-2 flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium text-dim transition-colors hover:bg-raised hover:text-ink disabled:opacity-60',
-            collapsed && 'justify-center px-0'
-          )}
-          title={collapsed ? 'Log out' : undefined}
-        >
-          <LogOut size={19} />
-          {!collapsed && <span>{loggingOut ? 'Logging out…' : 'Log out'}</span>}
-        </button>
-
         {!collapsed && user && (
           <div className="flex flex-col gap-2.5 rounded-[var(--radius-lg)] bg-raised p-3">
             <div className="flex items-center justify-between text-xs">

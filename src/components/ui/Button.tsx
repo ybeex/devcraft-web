@@ -11,8 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  // btn-3d (defined in globals.css) supplies the gradient + thickness-shadow + active-press
-  primary: 'btn-3d text-white',
+  primary: 'btn-3d text-[#080D1C]',
   ghost: 'bg-transparent text-ink hover:bg-card',
   outline: 'bg-card border border-rim text-ink shadow-elev-sm hover:shadow-elev-md',
   danger: 'bg-error text-white shadow-elev-sm hover:opacity-90',
