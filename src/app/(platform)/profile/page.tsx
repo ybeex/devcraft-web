@@ -8,6 +8,7 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { GOALS, type Goal } from '@/components/onboarding/GoalsStep'
 import { updateProfile } from '@/lib/api/users'
 import { ApiRequestError } from '@/lib/api/client'
+import { ImageUpload } from '@/components/ui/ImageUpload'
 import { AVATAR_PRESETS } from '@/lib/avatars'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
@@ -44,7 +45,6 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [avatar, setAvatar] = useState<string | null>(null)
-  const [urlDraft, setUrlDraft] = useState('')
   const [goals, setGoals] = useState<Goal[]>([])
   const [track, setTrack] = useState<'FE' | 'BE' | null>(null)
   const [loaded, setLoaded] = useState(false)
@@ -68,19 +68,6 @@ export default function ProfilePage() {
   function toggleGoal(g: Goal) {
     setSaved(false)
     setGoals((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : prev.length >= MAX_GOALS ? prev : [...prev, g]))
-  }
-
-  function applyUrl() {
-    const v = urlDraft.trim()
-    if (!v) return
-    if (!/^https:\/\/\S+$/i.test(v)) {
-      setError('Use an image link that starts with https://')
-      return
-    }
-    setError(null)
-    setSaved(false)
-    setAvatar(v)
-    setUrlDraft('')
   }
 
   async function handleSave(e: React.FormEvent) {
@@ -142,22 +129,11 @@ export default function ProfilePage() {
               </button>
             ))}
           </div>
-          <div className="mt-3 flex gap-2">
-            <input
-              value={urlDraft}
-              onChange={(e) => setUrlDraft(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyUrl() } }}
-              placeholder="…or paste an https:// image link"
-              aria-label="Avatar image link"
-              className="min-w-0 flex-1 rounded-[var(--radius-md)] border border-rim bg-card px-3.5 py-2 text-sm text-ink outline-none placeholder:text-ghost focus:border-brand"
-            />
-            <Button type="button" variant="outline" size="sm" onClick={applyUrl}>Use link</Button>
-            {avatar && (
-              <Button type="button" variant="ghost" size="sm" onClick={() => { setAvatar(null); setSaved(false) }}>
-                <Trash2 size={13} /> Remove
-              </Button>
-            )}
-          </div>
+          <ImageUpload
+            className="mt-4" label="Or upload your own" kind="avatar" shape="round"
+            value={avatar && !avatar.startsWith('data:') ? avatar : null}
+            onChange={(u) => { setAvatar(u); setSaved(false); setError(null) }}
+          />
         </section>
 
         <section>
