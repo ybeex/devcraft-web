@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Editor from '@monaco-editor/react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
-import { Database, Globe, Save, Share2, Check, Info, Sparkles, LayoutTemplate, FolderOpen, X } from 'lucide-react'
+import { Save, Share2, Check, Info, Sparkles, LayoutTemplate, FolderOpen, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TrustBanner } from '@/components/ui/TrustBanner'
 import { Skeleton } from '@/components/ui/Skeleton'
@@ -18,7 +18,6 @@ import {
 } from '@/lib/api/playground'
 import { ApiRequestError } from '@/lib/api/client'
 import { COMPONENT_TEMPLATE, SCRIPT_TEMPLATE } from '@/lib/playground-templates'
-import { useAuthStore } from '@/stores/auth-store'
 
 const ALL_LANGUAGES = [
   { value: 'web', label: 'Web (HTML/CSS/JS)' },
@@ -35,12 +34,23 @@ const ALL_LANGUAGES = [
 // actually relevant beats showing a generic 9-language list regardless of
 // where someone arrived from — the PRD's ask here specifically.
 const FE_LANGUAGES = ALL_LANGUAGES.filter((l) => l.value !== 'python' && l.value !== 'sql')
-const BE_LANGUAGES = ALL_LANGUAGES.filter((l) => l.value !== 'web')
+const BE_LANGUAGES = ALL_LANGUAGES.filter((l) => l.value !== 'web' && l.value !== 'html' && l.value !== 'css')
 
 const EXECUTABLE_LANGUAGES = new Set<string>(['javascript', 'typescript', 'python', 'sql'])
 
 const DEFAULT_CODE = '// Start typing — save to keep this snippet, share to send it to someone.\n'
 const BLANK_WEB_CONTENT: WebModeContent = { html: '', css: '', js: '' }
+type PlaygroundDraft = { title: string; description: string; language: string; code: string; webContent: WebModeContent; isPublic: boolean }
+
+function readPlaygroundDraft(key: string): PlaygroundDraft | null {
+  try {
+    const value = localStorage.getItem(key)
+    if (!value) return null
+    const draft = JSON.parse(value) as Partial<PlaygroundDraft>
+    if (typeof draft.title !== 'string' || typeof draft.description !== 'string' || typeof draft.language !== 'string' || typeof draft.code !== 'string') return null
+    return { title: draft.title, description: draft.description, language: draft.language, code: draft.code, webContent: draft.webContent ?? BLANK_WEB_CONTENT, isPublic: Boolean(draft.isPublic) }
+  } catch { return null }
+}
 
 function defaultLanguageFor(track: 'FE' | 'BE' | null): string {
   if (track === 'BE') return 'javascript'
@@ -50,13 +60,11 @@ function defaultLanguageFor(track: 'FE' | 'BE' | null): string {
 function PlaygroundContent() {
   const { resolvedTheme } = useTheme()
   const searchParams = useSearchParams()
-  const accountTrack = useAuthStore((s) => s.user?.primaryTrack ?? null)
-  const authHydrated = useAuthStore((s) => s.hasHydrated)
 
   const rawTrack = searchParams.get('track')
-  const routeTrack: 'FE' | 'BE' | null = rawTrack === 'FE' || rawTrack === 'BE' ? rawTrack : null
-  const track = accountTrack ?? routeTrack
-  const isScoped = track !== null
+  const track: 'FE' | 'BE' | null = rawTrack === 'FE' || rawTrack === 'BE' ? rawTrack : null
+  const [scopeCleared, setScopeCleared] = useState(false)
+  const isScoped = track !== null && !scopeCleared
   const languages = !isScoped ? ALL_LANGUAGES : track === 'BE' ? BE_LANGUAGES : FE_LANGUAGES
 
   const urlLanguage = searchParams.get('language')
@@ -76,11 +84,8 @@ function PlaygroundContent() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [copied, setCopied] = useState(false)
   const [browserOpen, setBrowserOpen] = useState(false)
-
-  useEffect(() => {
-    if (!authHydrated || languages.some((option) => option.value === language)) return
-    setLanguage(defaultLanguageFor(track))
-  }, [authHydrated, language, languages, track])
+  const [draftReady, setDraftReady] = useState(false)
+  const draftKey = `devcraft:playground-draft:${track ?? 'all'}`
 
   useEffect(() => {
     if (!browserOpen) return
@@ -95,6 +100,30 @@ function PlaygroundContent() {
 
   const isWeb = language === 'web'
   const isExecutable = EXECUTABLE_LANGUAGES.has(language)
+
+  useEffect(() => {
+    // A lesson intentionally opens the playground with code in the URL, so it takes priority over a saved scratch draft.
+    if (!urlCode) {
+      const draft = readPlaygroundDraft(draftKey)
+      if (draft && languages.some((item) => item.value === draft.language)) {
+        setTitle(draft.title)
+        setDescription(draft.description)
+        setLanguage(draft.language)
+        setCode(draft.code)
+        setWebContent(draft.webContent)
+        setIsPublic(draft.isPublic)
+      }
+    }
+    setDraftReady(true)
+    // The route scope and incoming lesson code are stable for a mounted playground.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!draftReady) return
+    const draft: PlaygroundDraft = { title, description, language, code, webContent, isPublic }
+    try { localStorage.setItem(draftKey, JSON.stringify(draft)) } catch {}
+  }, [code, description, draftKey, draftReady, isPublic, language, title, webContent])
 
   function changeLanguage(next: string) {
     setLanguage(next)
@@ -126,6 +155,7 @@ function PlaygroundContent() {
     setSaved(null)
     setRunResult(null)
     setRunError(null)
+    try { localStorage.removeItem(draftKey) } catch {}
   }
 
   function applyTemplate(template: typeof COMPONENT_TEMPLATE | typeof SCRIPT_TEMPLATE) {
@@ -195,10 +225,6 @@ function PlaygroundContent() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {authHydrated && track !== 'FE' && (
-            <Link href="/playground/database"><Button size="sm" variant="outline"><Database size={13} /> Database</Button></Link>
-          )}
-          <Link href="/playground/storefront"><Button size="sm" variant="outline"><Globe size={13} /> Storefront API</Button></Link>
           <Button size="sm" variant="outline" onClick={() => setBrowserOpen(true)}>
             <FolderOpen size={13} /> Snippets
           </Button>
@@ -216,9 +242,12 @@ function PlaygroundContent() {
         </div>
       </div>
 
-      {isScoped && authHydrated && (
+      {isScoped && (
         <TrustBanner icon={<LayoutTemplate />} tone="info" className="mt-4">
           Showing {track === 'BE' ? 'backend' : 'frontend'}-relevant languages only.{' '}
+          <button onClick={() => setScopeCleared(true)} className="font-semibold underline underline-offset-2">
+            Show all languages
+          </button>
         </TrustBanner>
       )}
 
@@ -237,21 +266,17 @@ function PlaygroundContent() {
               placeholder="Snippet title"
               className="min-w-0 flex-1 rounded-[var(--radius-sm)] bg-transparent px-2 py-1 text-sm font-semibold text-ink outline-none focus:bg-raised"
             />
-            {authHydrated ? (
-              <select
-                value={language}
-                onChange={(e) => changeLanguage(e.target.value)}
-                className="rounded-[var(--radius-sm)] border border-rim bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink outline-none focus:border-brand"
-              >
-                {languages.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span className="rounded-[var(--radius-sm)] border border-rim bg-canvas px-2.5 py-1.5 text-xs text-ghost">Loading your stack…</span>
-            )}
+            <select
+              value={language}
+              onChange={(e) => changeLanguage(e.target.value)}
+              className="rounded-[var(--radius-sm)] border border-rim bg-canvas px-2.5 py-1.5 text-xs font-medium text-ink outline-none focus:border-brand"
+            >
+              {languages.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
             <label
               className="flex items-center gap-1.5 text-xs font-medium text-dim"
               title="Public snippets can be opened via their share link and appear in Community browsing"
@@ -303,7 +328,7 @@ function PlaygroundContent() {
                   />
                 </div>
                 <div className="min-h-0 flex-1 lg:w-1/3">
-                  <ConsoleOutput onRun={handleRun} isRunning={isRunning} result={runResult} error={runError} />
+                  <ConsoleOutput onRun={handleRun} isRunning={isRunning} result={runResult} error={runError} language={language} />
                 </div>
               </div>
             ) : (
