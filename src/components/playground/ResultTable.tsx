@@ -9,12 +9,12 @@ function cell(v: unknown): string {
 }
 
 /** A query result as a table. NULL is shown as NULL (not blank) because telling them apart is half of learning SQL. */
-export function ResultTable({ result }: { result: TableResult }) {
+export function ResultTable({ result, className }: { result: TableResult; className?: string }) {
   if (result.columns.length === 0) {
     return <p className="font-mono text-[13px] text-success">{result.command || 'OK'}{result.rowCount ? ` · ${result.rowCount} rows` : ''}{result.ms !== undefined ? ` · ${result.ms} ms` : ''}</p>
   }
   return (
-    <div>
+    <div className={className}>
       <div className="max-h-[360px] overflow-auto rounded-[var(--radius-sm)] border border-rim-subtle">
         <table className="w-full border-collapse font-mono text-[12.5px]">
           <thead className="sticky top-0 bg-raised text-left text-dim">
@@ -30,7 +30,7 @@ export function ResultTable({ result }: { result: TableResult }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 font-sans text-[11px] text-ghost">
+      <p className="result-table-summary mt-2 font-sans text-[11px] text-ghost">
         {result.rowCount} row{result.rowCount === 1 ? '' : 's'}{result.truncated ? ' shown — there are more; add a LIMIT or a WHERE' : ''}{result.ms !== undefined ? ` · ${result.ms} ms` : ''}
       </p>
     </div>

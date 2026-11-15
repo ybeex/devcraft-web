@@ -10,9 +10,11 @@ interface ConsoleOutputProps {
   isRunning: boolean
   result: RunResult | null
   error: string | null
+  language: string
 }
 
-export function ConsoleOutput({ onRun, isRunning, result, error }: ConsoleOutputProps) {
+export function ConsoleOutput({ onRun, isRunning, result, error, language }: ConsoleOutputProps) {
+  const isConsoleLanguage = language === 'javascript' || language === 'typescript' || language === 'sql'
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-rim-subtle bg-raised px-3 py-1.5">
@@ -23,13 +25,13 @@ export function ConsoleOutput({ onRun, isRunning, result, error }: ConsoleOutput
         </Button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-canvas p-4 font-mono text-[13px] leading-relaxed">
+      <div className={cn('min-h-0 flex-1 overflow-y-auto bg-canvas p-4 font-mono text-[13px] leading-relaxed', isConsoleLanguage && 'code-console-output')}>
         {!result && !error && !isRunning && (
           <p className="text-ghost">Click Run to execute — output shows up here.</p>
         )}
 
         {isRunning && (
-          <p className="flex items-center gap-2 text-ghost">
+          <p className={cn('flex items-center gap-2 text-ghost', isConsoleLanguage && 'code-console-muted')}>
             <Loader2 size={13} className="animate-spin" /> Running in a sandboxed environment...
           </p>
         )}
@@ -47,12 +49,12 @@ export function ConsoleOutput({ onRun, isRunning, result, error }: ConsoleOutput
                 <Clock size={13} /> Timed out — check for an infinite loop or long-running operation.
               </p>
             )}
-            {result.stdout && <pre className="whitespace-pre-wrap break-words text-ink">{result.stdout}</pre>}
-            {result.stderr && <pre className="whitespace-pre-wrap break-words text-error">{result.stderr}</pre>}
+            {result.stdout && <section className={cn(isConsoleLanguage && 'code-console-card')}><p className="code-console-label">Output</p><pre className={cn('whitespace-pre-wrap break-words text-ink', isConsoleLanguage && 'code-console-stdout')}>{result.stdout}</pre></section>}
+            {result.stderr && <section className={cn(isConsoleLanguage && 'code-console-card code-console-error-card')}><p className="code-console-label">Error</p><pre className={cn('whitespace-pre-wrap break-words text-error', isConsoleLanguage && 'code-console-stderr')}>{result.stderr}</pre></section>}
             {!result.stdout && !result.stderr && !result.timedOut && (
-              <p className="text-ghost">Ran with no output.</p>
+              <p className={cn('text-ghost', isConsoleLanguage && 'code-console-muted')}>Ran with no output.</p>
             )}
-            <p className={cn('text-xs', result.exitCode === 0 ? 'text-success' : 'text-ghost')}>
+            <p className={cn('text-xs', result.exitCode === 0 ? 'text-success' : 'text-ghost', isConsoleLanguage && 'code-console-muted')}>
               {result.status}
               {result.exitCode !== null && ` · exit code ${result.exitCode}`}
             </p>
