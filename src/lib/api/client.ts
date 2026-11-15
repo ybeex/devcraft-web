@@ -25,13 +25,39 @@ export interface ApiError {
   }
 }
 
+/**
+ * Backend messages can contain provider names, hostnames, stack traces, or
+ * database details. They are useful in server logs, but never safe UI copy.
+ */
+export function userFacingApiMessage(statusCode: number, code?: string): string {
+  if (code === 'EMAIL_NOT_VERIFIED') return 'Please verify your email address to continue.'
+  if (code === 'SANDBOX_FREE_QUOTA') return 'You have used today\'s free practice runs. They come back at midnight UTC, and Pro removes the limit.'
+  if (code === 'SANDBOX_FREE_FULL') return 'The free practice database is full right now. Please try again in a little while, or unlock Pro.'
+  if (statusCode === 401) return 'Your session has expired. Please sign in again.'
+  if (statusCode === 403) return 'You do not have permission to do that.'
+  if (statusCode === 404) return 'We could not find what you requested.'
+  if (statusCode === 409) return 'That information changed. Refresh the page and try again.'
+  if (statusCode === 422 || statusCode === 400) return 'Please check your details and try again.'
+  if (statusCode === 429) return 'Too many requests. Please wait a moment and try again.'
+  if (statusCode === 402) return 'This feature is available with Pro.'
+  if (statusCode >= 500 || statusCode === 0) return 'Our service is temporarily unavailable. Please try again shortly.'
+  return 'We could not complete that request. Please try again.'
+}
+
+/** Safe copy for execution output when the runner exposes infrastructure failures. */
+export function userFacingExecutionError(message: string, fallback = 'The code runner is temporarily unavailable. Please try again shortly.'): string {
+  const databaseFailure = /\b(eai_again|enotfound|econnrefused|econnreset|etimedout|getaddrinfo|neon\.tech|postgres(?:ql)?|database url|connection (?:refused|failed|terminated))\b/i
+  if (databaseFailure.test(message)) return 'The practice database is temporarily unavailable. Please try again shortly.'
+  return /\b(internal server error|stack trace)\b/i.test(message) ? fallback : message
+}
+
 export class ApiRequestError extends Error {
   code: string
   statusCode: number
   details?: Record<string, unknown>
 
   constructor(error: ApiError['error']) {
-    super(error.message)
+    super(userFacingApiMessage(error.statusCode, error.code))
     this.name = 'ApiRequestError'
     this.code = error.code
     this.statusCode = error.statusCode
@@ -78,27 +104,41 @@ function browserTimezone(): string | undefined {
 async function rawApiFetch<T>(path: string, options: RequestOptions = {}): Promise<ApiSuccess<T>> {
   const { body, token, idempotencyKey, headers, ...rest } = options
 
-  const res = await fetch(`${API_URL}${path}`, {
-    credentials: 'include',   // the refresh token is an httpOnly cookie
-    ...rest,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...(idempotencyKey && { 'Idempotency-Key': idempotencyKey }),
-      'X-Auth-Mode': 'cookie',
-      ...(browserTimezone() && { 'X-Timezone': browserTimezone()! }),
-      ...headers,
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  })
+  let res: Response
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      credentials: 'include',   // the refresh token is an httpOnly cookie
+      ...rest,
+      headers: {
+        // A FormData body (file upload) sets its own multipart boundary; everything else is JSON.
+        ...(!(body instanceof FormData) && { 'Content-Type': 'application/json' }),
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...(idempotencyKey && { 'Idempotency-Key': idempotencyKey }),
+        'X-Auth-Mode': 'cookie',
+        ...(browserTimezone() && { 'X-Timezone': browserTimezone()! }),
+        ...headers,
+      },
+      body: body ? (body instanceof FormData ? body : JSON.stringify(body)) : undefined,
+    })
+  } catch {
+    throw new ApiRequestError({ code: 'NETWORK_ERROR', message: '', statusCode: 0 })
+  }
 
-  const json = (await res.json()) as ApiSuccess<T> | ApiError
+  let json: ApiSuccess<T> | ApiError
+  try {
+    json = (await res.json()) as ApiSuccess<T> | ApiError
+  } catch {
+    throw new ApiRequestError({ code: 'INVALID_RESPONSE', message: '', statusCode: res.status || 500 })
+  }
 
   if (!json.success) {
+    const error = 'error' in json && json.error
+      ? json.error
+      : { code: 'INVALID_RESPONSE', message: '', statusCode: res.status || 500 }
     // Any action the server refuses because the email is unverified opens the same prompt, wherever it
     // was attempted; the caller still gets the error and can keep its own state consistent.
-    if (json.error.code === 'EMAIL_NOT_VERIFIED') useVerifyPromptStore.getState().show()
-    throw new ApiRequestError(json.error)
+    if (error.code === 'EMAIL_NOT_VERIFIED') useVerifyPromptStore.getState().show()
+    throw new ApiRequestError(error)
   }
 
   return json
