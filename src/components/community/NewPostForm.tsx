@@ -15,7 +15,17 @@ import { cn } from '@/lib/utils'
 
 const TYPE_OPTIONS = ['Question', 'Showcase', 'Article', 'Note']
 
-export function NewPostForm() {
+interface NewPostFormProps {
+  lessonContext?: {
+    lessonTitle: string
+    lessonUrl: string
+    code?: string
+    language?: string
+  }
+  onSuccess?: (postId: string) => void
+}
+
+export function NewPostForm({ lessonContext, onSuccess }: NewPostFormProps = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -24,10 +34,10 @@ export function NewPostForm() {
   // lesson in the database, the reference just becomes part of the
   // post's own text, which is what "pre-fills lesson URL and code
   // snippet" describes.
-  const lessonTitle = searchParams.get('lessonTitle')
-  const lessonUrl = searchParams.get('lessonUrl')
-  const prefillCode = searchParams.get('code')
-  const prefillLanguage = searchParams.get('language')
+  const lessonTitle = lessonContext?.lessonTitle ?? searchParams.get('lessonTitle')
+  const lessonUrl = lessonContext?.lessonUrl ?? searchParams.get('lessonUrl')
+  const prefillCode = lessonContext?.code ?? searchParams.get('code')
+  const prefillLanguage = lessonContext?.language ?? searchParams.get('language')
 
   const [typeLabel, setTypeLabel] = useState('Question')
   const [showCode, setShowCode] = useState(!!prefillCode)
@@ -67,7 +77,8 @@ export function NewPostForm() {
         language: values.language || undefined,
         tags,
       })
-      router.push(`/community/${id}`)
+      if (onSuccess) onSuccess(id)
+      else router.push(`/community/${id}`)
     } catch (err) {
       setServerError(err instanceof ApiRequestError ? err.message : 'Something went wrong. Please try again.')
     }
