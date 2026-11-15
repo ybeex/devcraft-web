@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { BarChart3, LineChart, Layers, FolderCheck, Megaphone, UserCog, History, GitMerge, Ticket, BellRing, Database, Globe } from 'lucide-react'
+import { BarChart3, LineChart, Layers, FolderCheck, Megaphone, UserCog, History, GitMerge, Ticket, BellRing, Database, Globe, FolderKanban } from 'lucide-react'
 import { getPendingConflictCount } from '@/lib/api/admin'
 import { getAdminUnreadCount } from '@/lib/api/admin-notifications'
 import { cn } from '@/lib/utils'
@@ -21,6 +21,7 @@ const ADMIN_NAV: AdminNavItem[] = [
   { href: '/admin/analytics', label: 'Analytics', icon: LineChart },
   { href: '/admin/notifications', label: 'Alerts', icon: BellRing },
   { href: '/admin/content', label: 'Content', icon: Layers },
+  { href: '/admin/projects', label: 'Projects', icon: FolderKanban },
   { href: '/admin/submissions', label: 'Submissions', icon: FolderCheck },
   { href: '/admin/community', label: 'Community', icon: Megaphone },
   { href: '/admin/users', label: 'Users', icon: UserCog },
