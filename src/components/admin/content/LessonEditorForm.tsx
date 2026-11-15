@@ -20,6 +20,13 @@ const LANGUAGE_OPTIONS = [
   { value: 'sql', label: 'SQL (native — runs against real SQLite)' },
   { value: 'nodejs-db', label: 'JavaScript + practice database (db.query — Pro)' },
   { value: 'postgresql', label: 'PostgreSQL (learner\'s practice database — Pro)' },
+  { value: 'git-lab', label: 'Git lab (real repository + terminal — Pro)' },
+  { value: 'docker-lab', label: 'Docker lab (emulated engine + terminal — Pro)' },
+  { value: 'web-lab', label: 'HTML + CSS + JS tabs (live preview, in-browser tests)' },
+  { value: 'css-lab', label: 'CSS lab (fixed page, learner edits CSS, rendered-result tests)' },
+  { value: 'react-lab', label: 'React lab (live React preview, in-browser tests)' },
+  { value: 'next-lab', label: 'Next.js lab (App Router simulation, in-browser tests)' },
+  { value: 'webapp', label: 'Storefront app (HTML + CSS + JS tabs against the live API)' },
 ]
 
 /**
@@ -41,6 +48,15 @@ function languageEngineNote(language: string): string | null {
   }
   if (language === 'postgresql') {
     return 'Runs on the learner\'s own copy of the DevCraft Shop (PostgreSQL). Run keeps the change; Check runs the statement in a transaction that is rolled back. testCode uses test()/expect() with `result` (the learner\'s rows as objects: result.columns, result.rows, result.rowCount) and `await query("SELECT …")` to inspect the effect of DDL/DML, e.g. an index or a changed row. Pro learners only, so mark the lesson Premium.'
+  }
+  if (language === 'git-lab') {
+    return 'A real Git repository per learner. Starter = a scenario name (e.g. branches, conflict, remote-diverged). Solution = one command per line (prefix ? to tolerate a non-zero exit). testCode uses test()/expect() with the `repo` helpers (log, out, read, exists, branches, currentBranch, sha, tags, status, isClean, operation) and yaml.parse. Pro learners only, so mark the lesson Premium.'
+  }
+  if (language === 'docker-lab') {
+    return 'An emulated Docker engine per learner. Starter = a scenario name (e.g. api, stack, messy). Solution = one command per line (prefix ? to tolerate a non-zero exit). testCode uses test()/expect() with the `lab` helpers (container, image, containers, volumes, networks, file, dockerfile, compose, lastBuild, ran, history, peek, curl). Pro learners only, so mark the lesson Premium.'
+  }
+  if (['web-lab', 'css-lab', 'react-lab', 'next-lab', 'webapp'].includes(language)) {
+    return 'Browser lesson. Starter and solution are file bundles: one section per file, each starting with a line like "=== index.html ===" (add " (readonly)" for files the learner may look at but not change). web-lab/webapp: index.html + styles.css + app.js. css-lab: a readonly index.html and an editable styles.css. react-lab: App.jsx (+ more files). next-lab: app/layout.jsx, app/page.jsx, app/<route>/page.jsx, app/globals.css. testCode runs in the learner\'s browser against the rendered page with test(name, fn), expect(cond, message), css(selector, property), rect(selector), $, $$, text, click, type, waitFor, inFrame(width, fn) and files (the learner\'s sources). Verify with `npx tsx scripts/verify-labs.mts <slug>`.'
   }
   if (language === 'javascript') {
     return 'For topics where the real engine (e.g. a live database, a running server) isn\'t practical to stand up for grading, or the exercise is really a decision/classification task rather than "write a query," JavaScript can simulate the underlying logic instead — see the Schema Design and Indexes & EXPLAIN lessons (be-sql) or REST API Design (be-rest-apis) for this pattern.'

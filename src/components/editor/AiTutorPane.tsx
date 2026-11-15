@@ -150,7 +150,7 @@ export function AiTutorPane({ lessonId, language, currentCode, pendingError, onE
                 className={cn(
                   'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
                   msg.role !== 'assistant' && 'whitespace-pre-wrap',
-                  msg.role === 'user' && 'rounded-tr-sm bg-brand text-white',
+                  msg.role === 'user' && 'rounded-tr-sm bg-brand text-[#080D1C]',
                   msg.role === 'assistant' && 'rounded-tl-sm bg-card text-ink',
                   msg.role === 'system' && 'w-full rounded-lg bg-[var(--negative-bg)] text-center text-xs text-[var(--negative-text)]'
                 )}
@@ -191,7 +191,7 @@ export function AiTutorPane({ lessonId, language, currentCode, pendingError, onE
           <button
             onClick={handleAsk}
             disabled={isSending || !input.trim() || !!outOfCredits}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white disabled:opacity-50"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-[#080D1C] disabled:opacity-50"
             aria-label="Send"
           >
             <Send size={15} />

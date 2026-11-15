@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { CurriculumTree } from '@/components/curriculum/CurriculumTree'
+import { TrackGuard } from '@/components/curriculum/TrackGuard'
 
 export const metadata: Metadata = {
   title: 'Backend Curriculum',
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function BackendCurriculumPage() {
-  return <CurriculumTree track="BE" />
+  return <TrackGuard track="BE"><CurriculumTree track="BE" /></TrackGuard>
 }
