@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Briefcase, TrendingUp, Compass, RefreshCw, Check } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { Eyebrow, GradientText } from '@/components/marketing/primitives'
 import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
 
@@ -29,10 +30,20 @@ export function GoalsStep({ selected, onToggle, onContinue }: GoalsStepProps) {
   useEffect(() => { heading.current?.focus() }, [])
   return (
     <div className="flex flex-col items-center text-center">
-      <h1 ref={heading} tabIndex={-1} className="font-display text-3xl font-bold sm:text-4xl">What brings you here?</h1>
-      <p className="mt-3 max-w-sm text-white/90">Pick any that fit. We use it to decide which lessons come first. You can change it later.</p>
+      <Eyebrow>Step 2 · Your goals</Eyebrow>
+      <h1 ref={heading} tabIndex={-1} className="mt-5 font-display text-3xl font-bold sm:text-4xl">
+        What <GradientText>brings you</GradientText> here?
+      </h1>
+      <p className="mt-3 max-w-sm text-dim">Pick any that fit. We use it to decide which lessons come first. You can change it later.</p>
 
-      <motion.div variants={cascadeContainer} initial="initial" animate="animate" role="group" aria-label="Your goals" className="mt-10 flex w-full max-w-sm flex-wrap justify-center gap-3">
+      <motion.div
+        variants={cascadeContainer}
+        initial="initial"
+        animate="animate"
+        role="group"
+        aria-label="Your goals"
+        className="mt-9 flex w-full max-w-sm flex-wrap justify-center gap-3"
+      >
         {GOALS.map(({ id, label, icon: Icon }) => {
           const on = selected.includes(id)
           return (
@@ -43,8 +54,10 @@ export function GoalsStep({ selected, onToggle, onContinue }: GoalsStepProps) {
               variants={cascadeItem}
               onClick={() => onToggle(id)}
               className={cn(
-                'flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-medium transition-colors',
-                on ? 'border-white bg-white text-ink' : 'border-white/35 bg-white/10 text-white backdrop-blur-sm hover:bg-white/15',
+                'pill-pop flex items-center gap-2 rounded-full border px-5 py-3 text-sm font-medium',
+                on
+                  ? 'glow-brand border-brand/50 bg-brand-muted text-ink'
+                  : 'border-rim-subtle bg-card text-dim hover:border-brand/30 hover:text-ink'
               )}
             >
               {on ? <Check size={16} aria-hidden /> : <Icon size={16} aria-hidden />}
@@ -54,7 +67,7 @@ export function GoalsStep({ selected, onToggle, onContinue }: GoalsStepProps) {
         })}
       </motion.div>
 
-      <Button onClick={onContinue} className="mt-10 w-full max-w-xs justify-center">
+      <Button onClick={onContinue} className="shine glow-brand mt-9 w-full max-w-xs justify-center">
         {selected.length === 0 ? 'Skip this question' : 'Continue'}
       </Button>
     </div>
