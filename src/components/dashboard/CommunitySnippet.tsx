@@ -23,7 +23,7 @@ export function CommunitySnippet() {
   })
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
+    <div className="ring-gradient rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
       <div className="flex items-center justify-between">
         <h3 className="font-ui text-sm font-semibold text-ink">From the community</h3>
         <Link href="/community" className="flex items-center gap-1 text-xs font-semibold text-brand hover:underline">

@@ -76,7 +76,7 @@ export function ContinueLearningCard() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: easeOut }}
-      className="relative overflow-hidden rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-md"
+      className="ring-gradient relative overflow-hidden rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-md"
     >
       {data.lockedFrom && <ProLockNote moduleTitle={data.lockedFrom.moduleTitle} className="relative z-10 mb-5" />}
       <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

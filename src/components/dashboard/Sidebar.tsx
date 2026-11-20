@@ -40,6 +40,25 @@ interface SidebarProps {
   onNavigate?: () => void
 }
 
+/** Shared nav-link styling — active items carry the marketing gradient hairline. */
+function navItemClass(isActive: boolean, collapsed: boolean): string {
+  return cn(
+    'relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors',
+    isActive ? 'ring-gradient bg-brand-muted text-ink' : 'text-dim hover:bg-raised hover:text-ink',
+    collapsed && 'justify-center px-0'
+  )
+}
+
+function ActiveIndicator() {
+  return (
+    <motion.span
+      layoutId="sidebar-active-indicator"
+      className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gradient-to-b from-[var(--brand)] to-[var(--brand-2)] shadow-[0_0_12px_var(--glow)]"
+      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+    />
+  )
+}
+
 export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarProps) {
   const pathname = usePathname()
   const user = useAuthStore((s) => s.user)
@@ -51,19 +70,21 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
   return (
     <aside
       className={cn(
-        'flex h-full flex-col border-r border-rim-subtle bg-card transition-[width] duration-200',
+        'flex h-full flex-col border-r border-rim-subtle bg-card/80 backdrop-blur-xl transition-[width] duration-200',
         collapsed ? 'w-[76px]' : 'w-64'
       )}
     >
       {/* Logo + collapse toggle */}
       <div className="flex items-center justify-between border-b border-rim-subtle px-4 py-5">
-        <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
-          <DevCraftMark size={32} />
+        <Link href="/dashboard" className="group flex items-center gap-2.5 overflow-hidden">
+          <span className="transition-transform duration-300 group-hover:scale-110">
+            <DevCraftMark size={32} />
+          </span>
           {!collapsed && <span className="font-display whitespace-nowrap text-lg font-bold text-ink">DevCraft</span>}
         </Link>
         <button
           onClick={onToggleCollapsed}
-          className="hidden shrink-0 rounded-[var(--radius-sm)] p-1.5 text-dim hover:bg-raised hover:text-ink lg:block"
+          className="hidden shrink-0 rounded-full border border-rim-subtle bg-card p-1.5 text-dim transition-colors hover:border-brand/40 hover:text-ink lg:block"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
@@ -80,22 +101,12 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={cn(
-                'relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-brand-muted text-brand' : 'text-dim hover:bg-raised hover:text-ink',
-                collapsed && 'justify-center px-0'
-              )}
+              className={navItemClass(isActive, collapsed)}
               title={collapsed ? item.label : undefined}
             >
               <Icon size={19} />
               {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
-              {isActive && (
-                <motion.span
-                  layoutId="sidebar-active-indicator"
-                  className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-brand"
-                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                />
-              )}
+              {isActive && <ActiveIndicator />}
             </Link>
           )
         })}
@@ -109,22 +120,12 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
                 <Link
                   href="/admin"
                   onClick={onNavigate}
-                  className={cn(
-                    'relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive ? 'bg-brand-muted text-brand' : 'text-dim hover:bg-raised hover:text-ink',
-                    collapsed && 'justify-center px-0'
-                  )}
+                  className={navItemClass(isActive, collapsed)}
                   title={collapsed ? 'Admin' : undefined}
                 >
                   <ShieldCheck size={19} />
                   {!collapsed && <span className="whitespace-nowrap">Admin</span>}
-                  {isActive && (
-                    <motion.span
-                      layoutId="sidebar-active-indicator"
-                      className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-brand"
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                    />
-                  )}
+                  {isActive && <ActiveIndicator />}
                 </Link>
               )
             })()}
@@ -135,7 +136,7 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
       {/* Footer: XP/streak */}
       <div className="border-t border-rim-subtle p-3">
         {!collapsed && user && (
-          <div className="flex flex-col gap-2.5 rounded-[var(--radius-lg)] bg-raised p-3">
+          <div className="ring-gradient flex flex-col gap-2.5 rounded-[var(--radius-lg)] bg-raised p-3">
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1.5 font-semibold text-ink">
                 <FeatureIcon name="xpGem" size={16} /> Level {user.level}
@@ -146,7 +147,8 @@ export function Sidebar({ collapsed, onToggleCollapsed, onNavigate }: SidebarPro
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-card">
               <motion.div
-                className="h-full rounded-full bg-brand"
+                className="h-full rounded-full"
+                style={{ background: 'linear-gradient(90deg, var(--brand), var(--brand-2))' }}
                 initial={{ width: 0 }}
                 animate={{ width: `${xpPercent}%` }}
                 transition={{ duration: 0.6, ease: 'easeOut' }}

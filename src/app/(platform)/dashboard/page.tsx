@@ -10,6 +10,7 @@ import { CommunitySnippet } from '@/components/dashboard/CommunitySnippet'
 import { VerifyEmailBanner } from '@/components/auth/VerifyEmailBanner'
 import { useAuthStore } from '@/stores/auth-store'
 import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
+import { GradientText } from '@/components/marketing/primitives'
 
 function greeting(): string {
   const hour = new Date().getHours()
@@ -31,7 +32,7 @@ export default function DashboardPage() {
     >
       <motion.div variants={cascadeItem}>
         <h1 className="font-display text-2xl font-bold text-ink sm:text-3xl">
-          {greeting()}, {firstName}
+          {greeting()}, <GradientText>{firstName}</GradientText>
         </h1>
         <p className="mt-1 text-sm text-dim">Your learning at a glance.</p>
       </motion.div>
