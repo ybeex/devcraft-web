@@ -15,6 +15,7 @@ import { ApiRequestError } from '@/lib/api/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { GradientText, SpotlightCard } from '@/components/marketing/primitives'
 
 export function LoginForm() {
   const router = useRouter()
@@ -54,67 +55,70 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: easeOut }}
-      className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-lg"
     >
-      <h1 className="font-display text-2xl font-bold text-ink">Welcome back</h1>
-      <p className="mt-1.5 text-sm text-dim">Pick up right where you left off.</p>
+      <SpotlightCard interactive={false} className="p-7 shadow-elev-lg">
+        <h1 className="font-display text-2xl font-bold text-ink">
+          Welcome <GradientText>back</GradientText>
+        </h1>
+        <p className="mt-1.5 text-sm text-dim">Pick up right where you left off.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
-        {serverError && (
-          <TrustBanner icon={<AlertCircle />} className="bg-[var(--negative-bg)] text-[var(--negative-text)]">
-            {serverError}
-          </TrustBanner>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
+          {serverError && (
+            <TrustBanner icon={<AlertCircle />} className="bg-[var(--negative-bg)] text-[var(--negative-text)]">
+              {serverError}
+            </TrustBanner>
+          )}
 
-        <Field label="Email" error={errors.email?.message}>
-          <input
-            {...register('email')}
-            type="email"
-            placeholder="ada@example.com"
-            autoComplete="email"
-            className={inputClass(!!errors.email)}
-          />
-        </Field>
-
-        <Field
-          label="Password"
-          error={errors.password?.message}
-          trailing={
-            <Link href="/forgot-password" className="text-xs font-semibold text-brand hover:underline">
-              Forgot password?
-            </Link>
-          }
-        >
-          <div className="relative">
+          <Field label="Email" error={errors.email?.message}>
             <input
-              {...register('password')}
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Your password"
-              autoComplete="current-password"
-              className={cn(inputClass(!!errors.password), 'pr-10')}
+              {...register('email')}
+              type="email"
+              placeholder="ada@example.com"
+              autoComplete="email"
+              className={inputClass(!!errors.email)}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ghost hover:text-dim"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-        </Field>
+          </Field>
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2 w-full justify-center">
-          {isSubmitting ? 'Logging in...' : 'Log in'}
-        </Button>
-      </form>
+          <Field
+            label="Password"
+            error={errors.password?.message}
+            trailing={
+              <Link href="/forgot-password" className="text-xs font-semibold text-brand hover:underline">
+                Forgot password?
+              </Link>
+            }
+          >
+            <div className="relative">
+              <input
+                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Your password"
+                autoComplete="current-password"
+                className={cn(inputClass(!!errors.password), 'pr-10')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ghost hover:text-dim"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </Field>
 
-      <p className="mt-6 text-center text-sm text-dim">
-        New to DevCraft?{' '}
-        <Link href="/register" className="font-semibold text-brand hover:underline">
-          Create an account
-        </Link>
-      </p>
+          <Button type="submit" disabled={isSubmitting} className="shine glow-brand mt-2 w-full justify-center">
+            {isSubmitting ? 'Logging in...' : 'Log in'}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-dim">
+          New to DevCraft?{' '}
+          <Link href="/register" className="font-semibold text-brand hover:underline">
+            Create an account
+          </Link>
+        </p>
+      </SpotlightCard>
     </motion.div>
   )
 }

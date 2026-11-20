@@ -38,7 +38,7 @@ export function XpGoalRing() {
   const dashOffset = circumference * (1 - percent / 100)
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-6 shadow-elev-sm">
+    <div className="ring-gradient flex flex-col items-center gap-3 rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-6 shadow-elev-sm">
       <p className="text-xs font-semibold uppercase tracking-wide text-ghost">Today&apos;s goal</p>
       <div className="relative h-28 w-28">
         <svg viewBox="0 0 96 96" className="h-full w-full -rotate-90">

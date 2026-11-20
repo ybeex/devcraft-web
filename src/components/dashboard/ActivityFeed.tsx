@@ -34,7 +34,7 @@ export function ActivityFeed() {
   })
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
+    <div className="ring-gradient rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
       <h3 className="font-ui text-sm font-semibold text-ink">Recent activity</h3>
 
       {isLoading && (

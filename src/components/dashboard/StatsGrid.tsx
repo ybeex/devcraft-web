@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: number | string; label: string }) {
   return (
-    <div className="flex items-center gap-3.5 rounded-[var(--radius-lg)] border border-rim-subtle bg-card p-4 shadow-elev-sm">
+    <div className="ring-gradient flex items-center gap-3.5 rounded-[var(--radius-lg)] border border-rim-subtle bg-card p-4 shadow-elev-sm">
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-raised">
         {icon}
       </div>

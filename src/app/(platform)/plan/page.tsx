@@ -105,7 +105,7 @@ export default function PlanPage() {
         <h2 id="start-h" className="font-display text-lg font-bold text-ink">Where you start</h2>
         {retaking ? (
           <div className="mt-4">
-            <PlacementFlow track={track} tone="app" onDone={() => void afterRetake()} doneLabel="Update my plan" />
+            <PlacementFlow track={track} onDone={() => void afterRetake()} doneLabel="Update my plan" />
           </div>
         ) : (
           <>

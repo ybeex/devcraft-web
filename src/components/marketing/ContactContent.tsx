@@ -11,6 +11,7 @@ import { ContactFormSchema, type ContactFormValues } from '@/lib/schemas/contact
 import { apiFetch, ApiRequestError } from '@/lib/api/client'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { Eyebrow, GradientText, Reveal, SpotlightCard } from '@/components/marketing/primitives'
 
 export function ContactContent() {
   const [submitted, setSubmitted] = useState(false)
@@ -48,103 +49,117 @@ export function ContactContent() {
   }
 
   return (
-    <section className="mesh-bg px-6 py-20">
-      <div className="mx-auto max-w-lg">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: easeOut }}
-          className="text-center"
-        >
-          <Mail size={32} className="mx-auto text-brand" />
-          <h1 className="mt-4 font-display text-3xl font-bold text-ink sm:text-4xl">Get in touch</h1>
-          <p className="mt-2 text-dim">We read every message. Expect a reply within one business day.</p>
-        </motion.div>
+    <section className="aurora aurora-animate grain relative overflow-hidden px-6 py-24">
+      <div aria-hidden className="bg-grid mask-radial-fade pointer-events-none absolute inset-0 opacity-60" />
+      <div className="relative z-[2] mx-auto max-w-lg">
+        <div className="flex flex-col items-center text-center">
+          <Reveal>
+            <Eyebrow>Say hello</Eyebrow>
+          </Reveal>
+          <Reveal delay={0.06}>
+            <div className="relative mt-8">
+              <span
+                aria-hidden
+                className="absolute inset-0 -z-10 rounded-full bg-[radial-gradient(closest-side,var(--glow),transparent)] blur-lg"
+              />
+              <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-rim-subtle bg-card shadow-elev-md">
+                <Mail size={26} className="text-brand" />
+              </span>
+            </div>
+          </Reveal>
+          <Reveal delay={0.12}>
+            <h1 className="mt-5 text-balance font-display text-3xl font-bold leading-[1.1] text-ink sm:text-4xl">
+              Get <GradientText>in touch</GradientText>
+            </h1>
+          </Reveal>
+          <Reveal delay={0.18}>
+            <p className="mt-2 text-balance text-dim">
+              We read every message. Expect a reply within one business day.
+            </p>
+          </Reveal>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1, ease: easeOut }}
-          className="mt-10 rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-md"
-        >
-          <AnimatePresence mode="wait">
-            {submitted ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: easeOut }}
-                className="flex flex-col items-center gap-4 py-6 text-center"
-              >
-                <CheckCircle2 size={40} className="text-success" />
-                <h2 className="font-ui text-lg font-semibold text-ink">Message sent</h2>
-                <p className="text-sm text-dim">
-                  Thanks for reaching out — we&apos;ll get back to you within one business day.
-                </p>
-                <Button variant="outline" onClick={() => setSubmitted(false)}>
-                  Send another message
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onSubmit={handleSubmit(onSubmit)}
-                className="flex flex-col gap-4"
-                noValidate
-              >
-                {serverError && (
-                  <TrustBanner icon={<AlertCircle />} tone="info" className="bg-[var(--negative-bg)] text-[var(--negative-text)]">
-                    {serverError}
-                  </TrustBanner>
-                )}
+        <Reveal delay={0.24} className="mt-10">
+          <SpotlightCard className="p-7">
+            <AnimatePresence mode="wait">
+              {submitted ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: easeOut }}
+                  className="flex flex-col items-center gap-4 py-6 text-center"
+                >
+                  <CheckCircle2 size={40} className="text-success" />
+                  <h2 className="font-ui text-lg font-semibold text-ink">Message sent</h2>
+                  <p className="text-sm text-dim">
+                    Thanks for reaching out — we&apos;ll get back to you within one business day.
+                  </p>
+                  <Button variant="outline" onClick={() => setSubmitted(false)}>
+                    Send another message
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="flex flex-col gap-4"
+                  noValidate
+                >
+                  {serverError && (
+                    <TrustBanner icon={<AlertCircle />} tone="info" className="bg-[var(--negative-bg)] text-[var(--negative-text)]">
+                      {serverError}
+                    </TrustBanner>
+                  )}
 
-                <Field label="Name" error={errors.name?.message}>
-                  <input
-                    {...register('name')}
-                    type="text"
-                    placeholder="Ada Lovelace"
-                    className={inputClass(!!errors.name)}
-                  />
-                </Field>
+                  <Field label="Name" error={errors.name?.message}>
+                    <input
+                      {...register('name')}
+                      type="text"
+                      placeholder="Ada Lovelace"
+                      className={inputClass(!!errors.name)}
+                    />
+                  </Field>
 
-                <Field label="Email" error={errors.email?.message}>
-                  <input
-                    {...register('email')}
-                    type="email"
-                    placeholder="ada@example.com"
-                    className={inputClass(!!errors.email)}
-                  />
-                </Field>
+                  <Field label="Email" error={errors.email?.message}>
+                    <input
+                      {...register('email')}
+                      type="email"
+                      placeholder="ada@example.com"
+                      className={inputClass(!!errors.email)}
+                    />
+                  </Field>
 
-                <Field label="Subject" error={errors.subject?.message}>
-                  <input
-                    {...register('subject')}
-                    type="text"
-                    placeholder="Question about the Pro plan"
-                    className={inputClass(!!errors.subject)}
-                  />
-                </Field>
+                  <Field label="Subject" error={errors.subject?.message}>
+                    <input
+                      {...register('subject')}
+                      type="text"
+                      placeholder="Question about the Pro plan"
+                      className={inputClass(!!errors.subject)}
+                    />
+                  </Field>
 
-                <Field label="Message" error={errors.message?.message}>
-                  <textarea
-                    {...register('message')}
-                    rows={5}
-                    placeholder="Tell us what's on your mind..."
-                    className={cn(inputClass(!!errors.message), 'resize-none')}
-                  />
-                </Field>
+                  <Field label="Message" error={errors.message?.message}>
+                    <textarea
+                      {...register('message')}
+                      rows={5}
+                      placeholder="Tell us what's on your mind..."
+                      className={cn(inputClass(!!errors.message), 'resize-none')}
+                    />
+                  </Field>
 
-                <Button type="submit" disabled={isSubmitting} className="mt-2 w-full justify-center">
-                  {isSubmitting ? 'Sending...' : 'Send message'}
-                </Button>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </motion.div>
+                  <Button type="submit" disabled={isSubmitting} className="shine mt-2 w-full justify-center">
+                    {isSubmitting ? 'Sending...' : 'Send message'}
+                  </Button>
+                </motion.form>
+              )}
+            </AnimatePresence>
+          </SpotlightCard>
+        </Reveal>
       </div>
     </section>
   )
