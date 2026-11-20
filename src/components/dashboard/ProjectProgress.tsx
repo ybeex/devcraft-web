@@ -16,7 +16,7 @@ export function ProjectProgress() {
   const needs = data.filter((x) => x.status === 'NEEDS_REVISION')
 
   return (
-    <section data-testid="project-progress" className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
+    <section data-testid="project-progress" className="ring-gradient rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm">
       <h2 className="flex items-center gap-2 font-display text-base font-bold text-ink">
         <FolderCheck size={16} /> Your projects
       </h2>
