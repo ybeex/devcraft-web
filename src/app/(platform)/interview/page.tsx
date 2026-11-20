@@ -132,7 +132,7 @@ export default function InterviewPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={(v) => setMode(v as 'Q&A' | 'System design')} />
-          <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={(v) => { trackTouched.current = true; setTrackLabel(v) }} />
+          {!myTrack && <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={(v) => { trackTouched.current = true; setTrackLabel(v) }} />}
           <SegmentedControl options={DIFFICULTY_OPTIONS} value={difficultyLabel} onChange={setDifficultyLabel} />
           {mode === 'Q&A' && (
             <div className="flex items-center gap-2">

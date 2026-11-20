@@ -63,7 +63,14 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar onOpenMobileNav={() => setMobileNavOpen(true)} />
         <ProBanner />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="aurora relative flex-1 overflow-y-auto">
+          {/* Hairline grid masked to fade out below the header — the same structure cue the marketing pages use. */}
+          <div
+            aria-hidden
+            className="bg-grid mask-fade-b pointer-events-none absolute inset-x-0 top-0 h-[460px] opacity-40"
+          />
+          <div className="relative z-[1]">{children}</div>
+        </main>
       </div>
     </div>
   )

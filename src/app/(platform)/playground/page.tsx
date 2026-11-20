@@ -4,15 +4,13 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Editor from '@monaco-editor/react'
 import { useTheme } from 'next-themes'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import Link from 'next/link'
 import { Save, Share2, Check, Info, Sparkles, LayoutTemplate, FolderOpen, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { TrustBanner } from '@/components/ui/TrustBanner'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { SnippetBrowser } from '@/components/playground/SnippetBrowser'
 import { WebModeEditor } from '@/components/playground/WebModeEditor'
-import { ComponentModeEditor } from '@/components/playground/ComponentModeEditor'
 import { ConsoleOutput } from '@/components/playground/ConsoleOutput'
 import {
   createSnippet, runCode, serializeWebContent, parseWebContent,
@@ -20,19 +18,13 @@ import {
 } from '@/lib/api/playground'
 import { ApiRequestError } from '@/lib/api/client'
 import { COMPONENT_TEMPLATE, SCRIPT_TEMPLATE } from '@/lib/playground-templates'
-import { markdownComponents } from '@/lib/markdown/components'
-import { SyntaxCode } from '@/lib/markdown/SyntaxCode'
 
 const ALL_LANGUAGES = [
   { value: 'web', label: 'Web (HTML/CSS/JS)' },
   { value: 'javascript', label: 'JavaScript' },
   { value: 'typescript', label: 'TypeScript' },
-  { value: 'react', label: 'React' },
-  { value: 'nextjs', label: 'Next.js' },
   { value: 'python', label: 'Python' },
   { value: 'sql', label: 'SQL' },
-  { value: 'html', label: 'HTML' },
-  { value: 'css', label: 'CSS' },
   { value: 'json', label: 'JSON' },
   { value: 'markdown', label: 'Markdown' },
 ]
@@ -42,34 +34,27 @@ const ALL_LANGUAGES = [
 // actually relevant beats showing a generic 9-language list regardless of
 // where someone arrived from — the PRD's ask here specifically.
 const FE_LANGUAGES = ALL_LANGUAGES.filter((l) => l.value !== 'python' && l.value !== 'sql')
-const BE_LANGUAGES = ALL_LANGUAGES.filter((l) => !['web', 'html', 'css', 'react', 'nextjs'].includes(l.value))
+const BE_LANGUAGES = ALL_LANGUAGES.filter((l) => l.value !== 'web' && l.value !== 'html' && l.value !== 'css')
 
 const EXECUTABLE_LANGUAGES = new Set<string>(['javascript', 'typescript', 'python', 'sql'])
 
 const DEFAULT_CODE = '// Start typing — save to keep this snippet, share to send it to someone.\n'
 const BLANK_WEB_CONTENT: WebModeContent = { html: '', css: '', js: '' }
-const SQL_DATABASE_STARTER = `-- Create a temporary SQLite database, add sample rows, then query them.
--- Each Run starts fresh, so keep setup and queries together in this script.
+type PlaygroundDraft = { title: string; description: string; language: string; code: string; webContent: WebModeContent; isPublic: boolean }
 
-CREATE TABLE users (
-  id INTEGER PRIMARY KEY,
-  name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL
-);
-
-INSERT INTO users (name, email) VALUES
-  ('Ada Lovelace', 'ada@example.com'),
-  ('Grace Hopper', 'grace@example.com');
-
-SELECT id, name, email FROM users;`
+function readPlaygroundDraft(key: string): PlaygroundDraft | null {
+  try {
+    const value = localStorage.getItem(key)
+    if (!value) return null
+    const draft = JSON.parse(value) as Partial<PlaygroundDraft>
+    if (typeof draft.title !== 'string' || typeof draft.description !== 'string' || typeof draft.language !== 'string' || typeof draft.code !== 'string') return null
+    return { title: draft.title, description: draft.description, language: draft.language, code: draft.code, webContent: draft.webContent ?? BLANK_WEB_CONTENT, isPublic: Boolean(draft.isPublic) }
+  } catch { return null }
+}
 
 function defaultLanguageFor(track: 'FE' | 'BE' | null): string {
   if (track === 'BE') return 'javascript'
   return 'web'
-}
-
-function editorLanguageFor(language: string): string {
-  return language === 'react' || language === 'nextjs' ? 'typescript' : language
 }
 
 function PlaygroundContent() {
@@ -99,6 +84,8 @@ function PlaygroundContent() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [copied, setCopied] = useState(false)
   const [browserOpen, setBrowserOpen] = useState(false)
+  const [draftReady, setDraftReady] = useState(false)
+  const draftKey = `devcraft:playground-draft:${track ?? 'all'}`
 
   useEffect(() => {
     if (!browserOpen) return
@@ -113,6 +100,30 @@ function PlaygroundContent() {
 
   const isWeb = language === 'web'
   const isExecutable = EXECUTABLE_LANGUAGES.has(language)
+
+  useEffect(() => {
+    // A lesson intentionally opens the playground with code in the URL, so it takes priority over a saved scratch draft.
+    if (!urlCode) {
+      const draft = readPlaygroundDraft(draftKey)
+      if (draft && languages.some((item) => item.value === draft.language)) {
+        setTitle(draft.title)
+        setDescription(draft.description)
+        setLanguage(draft.language)
+        setCode(draft.code)
+        setWebContent(draft.webContent)
+        setIsPublic(draft.isPublic)
+      }
+    }
+    setDraftReady(true)
+    // The route scope and incoming lesson code are stable for a mounted playground.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!draftReady) return
+    const draft: PlaygroundDraft = { title, description, language, code, webContent, isPublic }
+    try { localStorage.setItem(draftKey, JSON.stringify(draft)) } catch {}
+  }, [code, description, draftKey, draftReady, isPublic, language, title, webContent])
 
   function changeLanguage(next: string) {
     setLanguage(next)
@@ -144,6 +155,7 @@ function PlaygroundContent() {
     setSaved(null)
     setRunResult(null)
     setRunError(null)
+    try { localStorage.removeItem(draftKey) } catch {}
   }
 
   function applyTemplate(template: typeof COMPONENT_TEMPLATE | typeof SCRIPT_TEMPLATE) {
@@ -199,12 +211,6 @@ function PlaygroundContent() {
     } finally {
       setIsRunning(false)
     }
-  }
-
-  function insertSqlDatabaseStarter() {
-    setCode(SQL_DATABASE_STARTER)
-    setRunResult(null)
-    setRunError(null)
   }
 
   return (
@@ -304,50 +310,10 @@ function PlaygroundContent() {
               <WebModeEditor value={webContent} onChange={setWebContent} theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'} />
             ) : isExecutable ? (
               <div className="flex h-full flex-col lg:flex-row">
-                <div className="flex min-h-0 flex-1 flex-col border-b border-rim-subtle lg:w-2/3 lg:border-b-0 lg:border-r">
-                  {language === 'sql' && (
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rim-subtle bg-raised px-3 py-2">
-                      <span className="text-xs text-dim">SQLite database is temporary; include setup and queries in each run.</span>
-                      <Button size="sm" variant="outline" onClick={insertSqlDatabaseStarter}>
-                        Create sample database
-                      </Button>
-                    </div>
-                  )}
-                  <div className="min-h-0 flex-1">
-                    <Editor
-                      value={code}
-                      language={editorLanguageFor(language)}
-                      theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
-                      onChange={(v) => setCode(v ?? '')}
-                      options={{
-                        fontSize: 13.5,
-                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                        minimap: { enabled: false },
-                        scrollBeyondLastLine: false,
-                        padding: { top: 16 },
-                        automaticLayout: true,
-                        tabSize: 2,
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="min-h-0 flex-1 lg:w-1/3">
-                  <ConsoleOutput onRun={handleRun} isRunning={isRunning} result={runResult} error={runError} />
-                </div>
-              </div>
-            ) : language === 'react' || language === 'nextjs' ? (
-              <ComponentModeEditor
-                value={code}
-                onChange={setCode}
-                mode={language}
-                theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
-              />
-            ) : language === 'markdown' || language === 'json' ? (
-              <div className="flex h-full min-h-0 flex-col lg:flex-row">
-                <div className="min-h-0 flex-1 border-b border-rim-subtle lg:w-1/2 lg:border-b-0 lg:border-r">
+                <div className="min-h-0 flex-1 border-b border-rim-subtle lg:w-2/3 lg:border-b-0 lg:border-r">
                   <Editor
                     value={code}
-                    language={editorLanguageFor(language)}
+                    language={language}
                     theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
                     onChange={(v) => setCode(v ?? '')}
                     options={{
@@ -361,30 +327,14 @@ function PlaygroundContent() {
                     }}
                   />
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto bg-canvas lg:w-1/2">
-                  <div className="border-b border-rim-subtle bg-raised px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-ghost">
-                    {language === 'markdown' ? 'Markdown preview' : 'JSON preview'}
-                  </div>
-                  <div className="p-5">
-                    {language === 'markdown' ? (
-                      code.trim() ? (
-                        <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{code}</Markdown>
-                      ) : <p className="text-sm text-ghost">Your Markdown preview will appear here.</p>
-                    ) : (() => {
-                      try {
-                        const formatted = JSON.stringify(JSON.parse(code), null, 2)
-                        return <pre className="overflow-x-auto rounded-[var(--radius-md)] border border-rim-subtle bg-card p-4"><SyntaxCode code={formatted} language="json" /></pre>
-                      } catch {
-                        return <p className="text-sm text-[var(--negative-text)]">Enter valid JSON to see the formatted preview.</p>
-                      }
-                    })()}
-                  </div>
+                <div className="min-h-0 flex-1 lg:w-1/3">
+                  <ConsoleOutput onRun={handleRun} isRunning={isRunning} result={runResult} error={runError} language={language} />
                 </div>
               </div>
             ) : (
               <Editor
                 value={code}
-                language={editorLanguageFor(language)}
+                language={language}
                 theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
                 onChange={(v) => setCode(v ?? '')}
                 options={{

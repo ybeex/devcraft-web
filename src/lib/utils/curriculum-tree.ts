@@ -1,4 +1,4 @@
-import type { CurriculumModule, CurriculumLesson } from '../api/curriculum'
+import type { CurriculumModule, CurriculumLesson, ComingSoonModule } from '../api/curriculum'
 import type { LessonStatusEntry } from '../api/progress'
 
 export type NodeState = 'locked' | 'available' | 'completed'
@@ -24,8 +24,11 @@ export interface LessonNodeData {
  * directly. "Locking" here exists purely to give the curriculum a sense of
  * progression; it is not, and should not be mistaken for, a security boundary.
  *
- * Rule: a module is locked until the previous module (by `order`) is fully
- * complete, or it's the first module. All lessons within an unlocked module
+ * Rule: a module is locked until the previous module is fully complete, or
+ * it's the first module. "Previous" is the order the server lists them in:
+ * once a learning path is published that is the path's journey, otherwise
+ * the modules' own `order`. Modules that are only "coming soon" are not in
+ * this list, so they neither block nor count. All lessons within an unlocked module
  * are freely available in any sequence — there is no per-lesson locking
  * within an already-unlocked module, since the backend has no prerequisite
  * graph to honor and arbitrary in-module ordering restrictions would only
@@ -36,7 +39,7 @@ export function computeModuleStates(
   lessonStatuses: LessonStatusEntry[]
 ): ModuleNodeData[] {
   const statusByLessonId = new Map(lessonStatuses.map((s) => [s.lessonId, s.status]))
-  const sortedModules = [...modules].sort((a, b) => a.order - b.order)
+  const sortedModules = [...modules]
 
   let previousModuleComplete = true // first module is always available
 
@@ -65,4 +68,31 @@ export function computeLessonStates(
     const status = statusByLessonId.get(lesson.id) ?? 'NOT_STARTED'
     return { lesson, state: status === 'COMPLETED' ? ('completed' as const) : ('available' as const) }
   })
+}
+
+/** One row of the curriculum tree: an available module, or a module that is coming soon. */
+export type TreeItem =
+  | { type: 'module'; key: string; data: ModuleNodeData }
+  | { type: 'coming-soon'; key: string; module: ComingSoonModule }
+
+/**
+ * Interleaves the "coming soon" modules with the available ones, each right after the module it follows in the learning
+ * path, so the journey reads as one continuous path.
+ */
+export function buildTreeItems(states: ModuleNodeData[], comingSoon: ComingSoonModule[] = []): TreeItem[] {
+  const items: TreeItem[] = []
+  const placed = new Set<string>()
+  const pushSoon = (after: string | null) => {
+    for (const c of comingSoon) {
+      if (c.afterModuleSlug === after && !placed.has(c.slug)) { placed.add(c.slug); items.push({ type: 'coming-soon', key: `soon:${c.slug}`, module: c }) }
+    }
+  }
+  pushSoon(null)
+  for (const s of states) {
+    items.push({ type: 'module', key: s.module.id, data: s })
+    pushSoon(s.module.slug)
+  }
+  // A coming-soon module anchored to a module that is not shown still belongs on the page; put it at the end of the journey.
+  for (const c of comingSoon) if (!placed.has(c.slug)) items.push({ type: 'coming-soon', key: `soon:${c.slug}`, module: c })
+  return items
 }

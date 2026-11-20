@@ -15,6 +15,7 @@ import { ApiRequestError } from '@/lib/api/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { GradientText, SpotlightCard } from '@/components/marketing/primitives'
 
 export function RegisterForm() {
   const router = useRouter()
@@ -65,87 +66,90 @@ export function RegisterForm() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: easeOut }}
-      className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-lg"
     >
-      <h1 className="font-display text-2xl font-bold text-ink">Create your account</h1>
-      <p className="mt-1.5 text-sm text-dim">Core curriculum is free, forever. No card required.</p>
+      <SpotlightCard interactive={false} className="p-7 shadow-elev-lg">
+        <h1 className="font-display text-2xl font-bold text-ink">
+          Create your <GradientText>account</GradientText>
+        </h1>
+        <p className="mt-1.5 text-sm text-dim">Core curriculum is free, forever. No card required.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
-        {serverError && (
-          <TrustBanner icon={<AlertCircle />} className="bg-[var(--negative-bg)] text-[var(--negative-text)]">
-            {serverError}
-          </TrustBanner>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
+          {serverError && (
+            <TrustBanner icon={<AlertCircle />} className="bg-[var(--negative-bg)] text-[var(--negative-text)]">
+              {serverError}
+            </TrustBanner>
+          )}
 
-        <Field label="Full name" error={errors.displayName?.message}>
-          <input
-            {...register('displayName')}
-            type="text"
-            placeholder="Ada Lovelace"
-            autoComplete="name"
-            className={inputClass(!!errors.displayName)}
-          />
-        </Field>
-
-        <Field label="Username" error={errors.username?.message}>
-          <input
-            {...register('username')}
-            type="text"
-            placeholder="adalovelace"
-            autoComplete="username"
-            className={inputClass(!!errors.username)}
-          />
-        </Field>
-
-        <Field label="Email" error={errors.email?.message}>
-          <input
-            {...register('email')}
-            type="email"
-            placeholder="ada@example.com"
-            autoComplete="email"
-            className={inputClass(!!errors.email)}
-          />
-        </Field>
-
-        <Field label="Password" error={errors.password?.message}>
-          <div className="relative">
+          <Field label="Full name" error={errors.displayName?.message}>
             <input
-              {...register('password')}
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Create a password"
-              autoComplete="new-password"
-              className={cn(inputClass(!!errors.password), 'pr-10')}
+              {...register('displayName')}
+              type="text"
+              placeholder="Ada Lovelace"
+              autoComplete="name"
+              className={inputClass(!!errors.displayName)}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ghost hover:text-dim"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-        </Field>
+          </Field>
 
-        <p className="-mt-2 text-xs text-ghost">At least 8 characters, with an uppercase letter, a lowercase letter and a number.</p>
+          <Field label="Username" error={errors.username?.message}>
+            <input
+              {...register('username')}
+              type="text"
+              placeholder="adalovelace"
+              autoComplete="username"
+              className={inputClass(!!errors.username)}
+            />
+          </Field>
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2 w-full justify-center">
-          {isSubmitting ? 'Creating account...' : 'Create account'}
-        </Button>
-      </form>
+          <Field label="Email" error={errors.email?.message}>
+            <input
+              {...register('email')}
+              type="email"
+              placeholder="ada@example.com"
+              autoComplete="email"
+              className={inputClass(!!errors.email)}
+            />
+          </Field>
 
-      <p className="mt-4 text-center text-xs text-ghost">
-        By creating an account you agree to the{' '}
-        <Link href="/legal/terms" className="underline hover:text-dim">Terms</Link> and{' '}
-        <Link href="/legal/privacy" className="underline hover:text-dim">Privacy Policy</Link>.
-      </p>
+          <Field label="Password" error={errors.password?.message}>
+            <div className="relative">
+              <input
+                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Create a password"
+                autoComplete="new-password"
+                className={cn(inputClass(!!errors.password), 'pr-10')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ghost hover:text-dim"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </Field>
 
-      <p className="mt-6 text-center text-sm text-dim">
-        Already have an account?{' '}
-        <Link href="/login" className="font-semibold text-brand hover:underline">
-          Log in
-        </Link>
-      </p>
+          <p className="-mt-2 text-xs text-ghost">At least 8 characters, with an uppercase letter, a lowercase letter and a number.</p>
+
+          <Button type="submit" disabled={isSubmitting} className="shine glow-brand mt-2 w-full justify-center">
+            {isSubmitting ? 'Creating account...' : 'Create account'}
+          </Button>
+        </form>
+
+        <p className="mt-4 text-center text-xs text-ghost">
+          By creating an account you agree to the{' '}
+          <Link href="/legal/terms" className="underline hover:text-dim">Terms</Link> and{' '}
+          <Link href="/legal/privacy" className="underline hover:text-dim">Privacy Policy</Link>.
+        </p>
+
+        <p className="mt-6 text-center text-sm text-dim">
+          Already have an account?{' '}
+          <Link href="/login" className="font-semibold text-brand hover:underline">
+            Log in
+          </Link>
+        </p>
+      </SpotlightCard>
     </motion.div>
   )
 }

@@ -16,9 +16,6 @@ import { SkeletonTableRow } from '@/components/ui/Skeleton'
 import { Button } from '@/components/ui/Button'
 import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
-import Markdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { markdownComponents } from '@/lib/markdown/components'
 
 const PAGE_SIZE = 15
 
@@ -223,7 +220,7 @@ function SubmissionRow({
                 </Button>
               </div>
               {submission.aiReview ? (
-                <div className="max-h-[28rem] overflow-y-auto text-sm"><Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{submission.aiReview}</Markdown></div>
+                <pre className="whitespace-pre-wrap font-sans text-xs text-dim">{submission.aiReview}</pre>
               ) : (
                 <p className="text-xs text-ghost">Not reviewed yet.</p>
               )}

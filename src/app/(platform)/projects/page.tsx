@@ -50,7 +50,7 @@ export default function ProjectsPage() {
           <p className="mt-1 text-sm text-dim">Build real things. Ship them. Put them in your portfolio.</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={pick} />
+          {!myTrack && <SegmentedControl options={TRACK_OPTIONS} value={trackLabel} onChange={pick} />}
           <SegmentedControl options={DIFFICULTY_OPTIONS} value={difficultyLabel} onChange={setDifficultyLabel} />
         </div>
       </div>

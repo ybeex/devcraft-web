@@ -5,8 +5,11 @@ import remarkGfm from 'remark-gfm'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import { markdownComponents } from '@/lib/markdown/components'
 import type { LessonDetail } from '@/lib/api/lessons'
+import { HintLadder, KnowledgeCheck, LessonOverview, NextStep, RealWorldNote } from './LessonGuide'
 
 export function LessonContentPane({ lesson }: { lesson: LessonDetail }) {
+  // Lessons from the rebuilt curriculum carry objectives, hints, a knowledge check and a place in the learner's journey.
+  const rebuilt = lesson.curriculumVersion === 2
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="mb-5 flex items-center gap-3">
@@ -21,9 +24,20 @@ export function LessonContentPane({ lesson }: { lesson: LessonDetail }) {
         <span className="text-xs font-semibold text-brand">+{lesson.xpReward} XP</span>
       </div>
 
+      {rebuilt && <LessonOverview lesson={lesson} />}
+
       <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {lesson.content}
       </Markdown>
+
+      {rebuilt && (
+        <>
+          <HintLadder key={lesson.id} hints={lesson.hints} />
+          <RealWorldNote text={lesson.realWorld} />
+          <KnowledgeCheck key={`kc-${lesson.id}`} items={lesson.knowledgeCheck} />
+          <NextStep lesson={lesson} />
+        </>
+      )}
 
       {lesson.conceptTags.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2 border-t border-rim-subtle pt-5">

@@ -14,13 +14,10 @@ import {
 } from '@/lib/api/notifications'
 import { getMessage, getLink, timeAgo } from '@/lib/utils/notification-format'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { ProfileMenu } from './ProfileMenu'
 import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
-
-function initials(name: string): string {
-  return name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
-}
 
 export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   const router = useRouter()
@@ -156,10 +153,10 @@ export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
   }
 
   return (
-    <header className="flex items-center gap-4 border-b border-rim-subtle bg-canvas px-5 py-3.5">
+    <header className="relative z-30 flex items-center gap-4 border-b border-rim-subtle bg-canvas/75 px-5 py-3.5 backdrop-blur-xl">
       {/* Mobile hamburger */}
       {onOpenMobileNav && (
-        <button onClick={onOpenMobileNav} className="rounded-[var(--radius-sm)] p-2 text-dim hover:bg-card lg:hidden">
+        <button onClick={onOpenMobileNav} className="rounded-full border border-rim-subtle bg-card p-2 text-dim transition-colors hover:border-brand/40 hover:text-ink lg:hidden">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 12h18M3 6h18M3 18h18" strokeLinecap="round" />
           </svg>
@@ -168,7 +165,7 @@ export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
 
       {/* Search */}
       <div ref={containerRef} className="relative w-full max-w-md">
-        <div className="flex items-center gap-2.5 rounded-full border border-rim bg-card px-4 py-2.5">
+        <div className="flex items-center gap-2.5 rounded-full border border-rim-subtle bg-card/70 px-4 py-2.5 backdrop-blur transition-colors focus-within:border-brand/40 focus-within:ring-2 focus-within:ring-brand/20">
           <Search size={16} className="shrink-0 text-ghost" />
           <input
             ref={inputRef}
@@ -257,7 +254,7 @@ export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         {/* Theme toggle */}
         <button
           onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-          className="rounded-full p-2.5 text-dim hover:bg-card"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-rim-subtle bg-card text-dim transition-all duration-300 hover:scale-105 hover:border-brand/40 hover:text-ink"
           aria-label="Toggle theme"
         >
           {resolvedTheme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
@@ -267,7 +264,7 @@ export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
         <div ref={bellRef} className="relative">
           <button
             onClick={() => setBellOpen((o) => !o)}
-            className="relative rounded-full p-2.5 text-dim hover:bg-card"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-rim-subtle bg-card text-dim transition-all duration-300 hover:scale-105 hover:border-brand/40 hover:text-ink"
             aria-label={unread?.count ? `Notifications, ${unread.count} unread` : 'Notifications'}
             aria-haspopup="true"
             aria-expanded={bellOpen}
@@ -334,21 +331,7 @@ export function TopBar({ onOpenMobileNav }: { onOpenMobileNav?: () => void }) {
           </AnimatePresence>
         </div>
 
-        {/* Avatar */}
-        {user && (
-          <Link
-            href="/profile"
-            aria-label="Your profile"
-            className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-muted text-xs font-bold text-brand"
-          >
-            {user.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt={user.displayName} className="h-full w-full object-cover" />
-            ) : (
-              initials(user.displayName)
-            )}
-          </Link>
-        )}
+        <ProfileMenu />
       </div>
     </header>
   )

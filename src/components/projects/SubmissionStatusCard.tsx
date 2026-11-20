@@ -1,4 +1,4 @@
-import { ExternalLink, GiftIcon } from 'lucide-react'
+import { ExternalLink, Github } from 'lucide-react'
 import { StatusDot } from '@/components/ui/StatusDot'
 import { AvatarStack } from '@/components/ui/AvatarStack'
 import type { MySubmission } from '@/lib/api/projects'
@@ -35,7 +35,7 @@ export function SubmissionStatusCard({ submission }: { submission: MySubmission 
             rel="noreferrer"
             className="flex items-center gap-1.5 rounded-full border border-rim px-3.5 py-2 text-xs font-medium text-dim transition-colors hover:text-ink"
           >
-            <GiftIcon size={13} /> Repository
+            <Github size={13} /> Repository
           </a>
         )}
         {submission.liveUrl && (

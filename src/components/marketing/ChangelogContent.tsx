@@ -1,9 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { ShieldCheck, Sparkles, Wrench } from 'lucide-react'
 import { IconChip } from '@/components/ui/IconChip'
-import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
+import { Eyebrow, GradientText, Reveal, RevealGroup, RevealItem } from '@/components/marketing/primitives'
 
 type EntryTag = 'Feature' | 'Fix' | 'Security'
 
@@ -61,36 +60,60 @@ const ENTRIES: ChangelogEntry[] = [
 
 export function ChangelogContent() {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-16">
-      <header className="mb-14 text-center">
-        <h1 className="font-display text-4xl font-bold text-ink">Changelog</h1>
-        <p className="mt-3 text-dim">What shipped, when, and why it matters.</p>
-      </header>
+    <>
+      {/* ─── Hero ────────────────────────────────────────────────────────── */}
+      <section className="aurora aurora-animate grain relative overflow-hidden px-6 pb-14 pt-24 text-center">
+        <div aria-hidden className="bg-grid mask-radial-fade pointer-events-none absolute inset-0 opacity-60" />
+        <div className="relative z-[2] mx-auto flex max-w-2xl flex-col items-center">
+          <Reveal>
+            <Eyebrow>Shipping log</Eyebrow>
+          </Reveal>
+          <Reveal delay={0.06}>
+            <h1 className="mt-5 text-balance font-display text-4xl font-bold leading-[1.08] text-ink sm:text-5xl">
+              <GradientText>Changelog</GradientText>
+            </h1>
+          </Reveal>
+          <Reveal delay={0.12}>
+            <p className="mt-4 text-balance text-dim">What shipped, when, and why it matters.</p>
+          </Reveal>
+        </div>
+      </section>
 
-      <motion.ol
-        variants={cascadeContainer}
-        initial="initial"
-        animate="animate"
-        className="relative flex flex-col gap-10 border-l border-rim-subtle pl-8"
-      >
-        {ENTRIES.map((entry) => {
-          const config = TAG_CONFIG[entry.tag]
-          return (
-            <motion.li key={entry.title} variants={cascadeItem} className="relative">
-              <span
-                className="absolute -left-[calc(2rem+5px)] top-1.5 h-2.5 w-2.5 rounded-full bg-brand ring-4 ring-canvas"
-                aria-hidden
-              />
-              <time className="text-xs font-semibold uppercase tracking-wide text-ghost">{entry.date}</time>
-              <div className="mt-2 flex items-center gap-3">
-                <IconChip icon={config.icon} label={entry.tag} variant="tonal" tone={config.tone} className="px-3 py-1 text-xs" />
-              </div>
-              <h2 className="mt-3 font-ui text-lg font-semibold text-ink">{entry.title}</h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-dim">{entry.body}</p>
-            </motion.li>
-          )
-        })}
-      </motion.ol>
-    </div>
+      {/* ─── Timeline ────────────────────────────────────────────────────── */}
+      <section className="px-6 pb-28">
+        <RevealGroup className="relative mx-auto flex max-w-2xl flex-col gap-6" stagger={0.08}>
+          <div
+            aria-hidden
+            className="absolute bottom-4 left-3 top-4 w-px"
+            style={{ background: 'linear-gradient(to bottom, rgba(var(--aurora-a),.5), rgba(var(--aurora-c),.3), transparent)' }}
+          />
+          {ENTRIES.map((entry) => {
+            const config = TAG_CONFIG[entry.tag]
+            return (
+              <RevealItem key={entry.title} className="relative pl-10">
+                <span
+                  aria-hidden
+                  className="absolute left-[7px] top-2 h-2.5 w-2.5 rounded-full bg-brand ring-4 ring-canvas"
+                />
+                <div className="spotlight lift relative rounded-[var(--radius-lg)] border border-rim-subtle bg-card p-6 shadow-elev-sm transition-colors duration-300 hover:border-brand/40">
+                  <time className="text-xs font-semibold uppercase tracking-wide text-ghost">{entry.date}</time>
+                  <div className="mt-2">
+                    <IconChip
+                      icon={config.icon}
+                      label={entry.tag}
+                      variant="tonal"
+                      tone={config.tone}
+                      className="px-3 py-1 text-xs [&>svg]:h-4 [&>svg]:w-4"
+                    />
+                  </div>
+                  <h2 className="mt-3 font-ui text-lg font-semibold text-ink">{entry.title}</h2>
+                  <p className="mt-1.5 text-sm leading-relaxed text-dim">{entry.body}</p>
+                </div>
+              </RevealItem>
+            )
+          })}
+        </RevealGroup>
+      </section>
+    </>
   )
 }

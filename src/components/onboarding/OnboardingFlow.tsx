@@ -13,22 +13,28 @@ import { LevelStep } from './LevelStep'
 import { MeetTutorStep } from './MeetTutorStep'
 import { useAuthStore } from '@/stores/auth-store'
 import { updateProfile } from '@/lib/api/users'
-import { pageTransition } from '@/lib/motion/variants'
+import { easeOut, pageTransition } from '@/lib/motion/variants'
 
-// Every stop is dark enough for white text to reach WCAG AA (4.5:1) with margin.
-const BRAND_GRADIENT = 'linear-gradient(160deg, #8a5a2b 0%, #6b4226 55%, #4a2d1a 100%)'
-const FE_GRADIENT = 'linear-gradient(160deg, #92400e 0%, #78350f 55%, #4a2208 100%)'
-const BE_GRADIENT = 'linear-gradient(160deg, #6d28d9 0%, #5b21b6 55%, #3b1478 100%)'
+const TOTAL_STEPS = 4
 
-function gradientFor(step: number, track: 'FE' | 'BE' | null): string {
-  if (step === 0 || !track) return BRAND_GRADIENT
-  return track === 'BE' ? BE_GRADIENT : FE_GRADIENT
+/**
+ * The ambient wash behind the panel adopts the chosen track's discipline colour
+ * (the same --track-fe / --track-be the marketing cards use). Picking a track
+ * becomes a visible mood shift rather than a hard gradient swap, and it stays
+ * theme-aware because it reads the runtime tokens rather than hard-coded hexes.
+ */
+function sceneGlow(track: 'FE' | 'BE' | null): string {
+  const c = track === 'BE' ? 'var(--track-be)' : 'var(--track-fe)'
+  return `radial-gradient(circle, color-mix(in srgb, ${c} 26%, transparent) 0%, transparent 68%)`
 }
 
 function trackFromParam(value: string | null): 'FE' | 'BE' | null {
   const v = value?.toLowerCase()
   return v === 'fe' ? 'FE' : v === 'be' ? 'BE' : null
 }
+
+const CHROME_BUTTON =
+  'inline-flex items-center gap-1.5 rounded-full border border-rim-subtle bg-card/60 px-3.5 py-2 text-sm font-medium text-dim backdrop-blur transition-colors hover:border-brand/40 hover:text-ink'
 
 export function OnboardingFlow() {
   const router = useRouter()
@@ -106,73 +112,90 @@ export function OnboardingFlow() {
   if (!hasHydrated || !accessToken || user?.onboardedAt) return <BrandedLoader />
 
   return (
-    <div className="onboarding-scene relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-12 text-white">
-      <div className="fixed inset-0 -z-10">
-        <AnimatePresence>
-          <motion.div
-            key={gradientFor(step, selectedTrack)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-            className="absolute inset-0"
-            style={{ background: gradientFor(step, selectedTrack) }}
-          />
-        </AnimatePresence>
-        {step === 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.14 }} transition={{ duration: 0.8 }} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <DevCraftMark size={420} animate="wobble" />
-          </motion.div>
-        )}
+    <div className="aurora aurora-animate grain relative flex min-h-screen flex-col overflow-hidden">
+      {/* hairline grid, radially masked for depth — the same structure cue the marketing pages use */}
+      <div aria-hidden className="bg-grid mask-radial-fade pointer-events-none absolute inset-0 opacity-50" />
+
+      {/* ambient wash, tinted to the chosen track */}
+      <AnimatePresence>
+        <motion.div
+          key={selectedTrack ?? 'brand'}
+          aria-hidden
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: easeOut }}
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px]"
+          style={{ background: sceneGlow(selectedTrack) }}
+        />
+      </AnimatePresence>
+
+      {/* brand watermark */}
+      <div aria-hidden className="pointer-events-none absolute -bottom-24 -right-16 hidden opacity-[0.06] lg:block">
+        <DevCraftMark size={420} animate="wobble" />
       </div>
 
-      <div className="fixed left-0 right-0 top-0 z-20 flex items-center justify-between px-6 py-6 sm:px-10">
-        {step > 0 ? (
-          <button type="button" onClick={() => { setError(null); setStep((s) => (s === 3 && !selectedTrack ? 1 : s - 1)) }} className="flex items-center gap-1.5 text-sm font-medium text-white/90 underline-offset-4 hover:text-white hover:underline">
-            <ArrowLeft size={16} aria-hidden /> Back
-          </button>
-        ) : (
-          <span />
-        )}
-        <OnboardingProgress step={step} total={4} />
-        {step < 3 ? (
-          <button type="button" onClick={handleSkip} className="text-sm font-medium text-white/90 underline-offset-4 hover:text-white hover:underline">
-            Skip for now
-          </button>
-        ) : (
-          <span className="w-[5.5rem]" />
-        )}
-      </div>
+      {/* Top chrome: back · progress · skip */}
+      <header className="relative z-20 flex items-center justify-between gap-4 px-6 py-6 sm:px-10">
+        <div className="flex w-[6rem] items-center">
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={() => { setError(null); setStep((s) => (s === 3 && !selectedTrack ? 1 : s - 1)) }}
+              className={CHROME_BUTTON}
+            >
+              <ArrowLeft size={15} aria-hidden /> Back
+            </button>
+          )}
+        </div>
+        <OnboardingProgress step={step} total={TOTAL_STEPS} />
+        <div className="flex w-[6rem] items-center justify-end">
+          {step < 3 && (
+            <button type="button" onClick={handleSkip} className={CHROME_BUTTON}>
+              Skip
+            </button>
+          )}
+        </div>
+      </header>
 
-      <div className="relative z-10 w-full max-w-lg">
-        <AnimatePresence mode="wait">
-          <motion.div key={step} variants={pageTransition('forward')} initial="initial" animate="animate" exit="exit" className="[&_h1]:outline-none">
-            {step === 0 && (
-              <TrackSelectStep selected={selectedTrack} onSelect={(t) => { setSelectedTrack(t); persistTrack(t) }} onContinue={() => setStep(1)} />
-            )}
-            {step === 1 && <GoalsStep selected={selectedGoals} onToggle={toggleGoal} onContinue={() => setStep(selectedTrack ? 2 : 3)} />}
-            {step === 2 && selectedTrack && (
-              <LevelStep
-                track={selectedTrack}
-                onDone={(r) => { setStartModuleTitle(r.startModule?.title ?? null); setStep(3) }}
-                onLater={() => setStep(3)}
-              />
-            )}
-            {step === 3 && (
-              <MeetTutorStep
-                track={selectedTrack}
-                startModuleTitle={startModuleTitle}
-                emailVerified={user?.emailVerified}
-                email={user?.email}
-                isFinishing={isFinishing}
-                error={error}
-                onFinish={handleFinish}
-                onSkipSaving={() => router.push('/dashboard')}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      <main className="relative z-10 flex flex-1 items-center justify-center px-6 pb-16">
+        <div className="ring-gradient relative flex min-h-[26rem] w-full max-w-xl flex-col justify-center overflow-hidden rounded-[var(--radius-xl)] border border-rim-subtle bg-card/70 p-8 shadow-elev-lg backdrop-blur-xl sm:p-10">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              variants={pageTransition('forward')}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="[&_h1]:outline-none"
+            >
+              {step === 0 && (
+                <TrackSelectStep selected={selectedTrack} onSelect={(t) => { setSelectedTrack(t); persistTrack(t) }} onContinue={() => setStep(1)} />
+              )}
+              {step === 1 && <GoalsStep selected={selectedGoals} onToggle={toggleGoal} onContinue={() => setStep(selectedTrack ? 2 : 3)} />}
+              {step === 2 && selectedTrack && (
+                <LevelStep
+                  track={selectedTrack}
+                  onDone={(r) => { setStartModuleTitle(r.startModule?.title ?? null); setStep(3) }}
+                  onLater={() => setStep(3)}
+                />
+              )}
+              {step === 3 && (
+                <MeetTutorStep
+                  track={selectedTrack}
+                  startModuleTitle={startModuleTitle}
+                  emailVerified={user?.emailVerified}
+                  email={user?.email}
+                  isFinishing={isFinishing}
+                  error={error}
+                  onFinish={handleFinish}
+                  onSkipSaving={() => router.push('/dashboard')}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </main>
     </div>
   )
 }

@@ -21,8 +21,12 @@ export function ProjectCard({ project }: { project: ProjectListItem }) {
         href={`/projects/${project.id}`}
         className="flex h-full flex-col rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-5 shadow-elev-sm transition-shadow hover:shadow-elev-md"
       >
+        {project.thumbnailUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={project.thumbnailUrl} alt="" className="-mx-5 -mt-5 mb-4 h-36 w-[calc(100%+2.5rem)] max-w-none rounded-t-[var(--radius-xl)] object-cover" />
+        )}
         <div className="flex items-start justify-between gap-3">
-          <FeatureIcon name="projectRocket" size={44} />
+          {project.thumbnailUrl ? <span /> : <FeatureIcon name="projectRocket" size={44} />}
           <div className="flex items-center gap-2">
             {project.isPremium && (
               <span className="rounded-full bg-brand-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand">

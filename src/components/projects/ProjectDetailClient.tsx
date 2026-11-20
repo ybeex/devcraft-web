@@ -3,9 +3,9 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Clock, Lock } from 'lucide-react'
+import { ArrowLeft, Clock, Download, Lock, Play } from 'lucide-react'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { TrustBanner, GuidanceCard } from '@/components/ui/TrustBanner'
@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { ProjectStages } from './ProjectStages'
 import { ProjectSubmitForm } from './ProjectSubmitForm'
 import { SubmissionStatusCard } from './SubmissionStatusCard'
-import { getProject, getMySubmissions } from '@/lib/api/projects'
+import { getProject, getMySubmissions, getMyStarted, startProject, downloadStarter } from '@/lib/api/projects'
 import { ApiRequestError } from '@/lib/api/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { easeOut } from '@/lib/motion/variants'
@@ -43,6 +43,19 @@ export function ProjectDetailClient({ id }: { id: string }) {
   const { data: submissions, isLoading: submissionsLoading } = useQuery({
     queryKey: ['my-submissions'],
     queryFn: getMySubmissions,
+  })
+
+  const { data: started } = useQuery({ queryKey: ['my-started'], queryFn: getMyStarted, enabled: !!user })
+  const isStarted = !!started?.some((p) => p.id === id)
+  const [startError, setStartError] = useState<string | null>(null)
+  const start = useMutation({
+    mutationFn: () => startProject(id),
+    onSuccess: () => { setStartError(null); void queryClient.invalidateQueries({ queryKey: ['my-started'] }) },
+    onError: (e) => setStartError(e instanceof Error ? e.message : 'Could not start the project'),
+  })
+  const download = useMutation({
+    mutationFn: () => downloadStarter(id, project?.slug ? `${project.slug}-starter.zip` : undefined),
+    onError: (e) => setStartError(e instanceof Error ? e.message : 'Download failed'),
   })
 
   const mySubmission = useMemo(
@@ -79,6 +92,11 @@ export function ProjectDetailClient({ id }: { id: string }) {
       <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm font-medium text-dim hover:text-ink">
         <ArrowLeft size={14} /> All projects
       </Link>
+
+      {project.thumbnailUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={project.thumbnailUrl} alt="" className="mt-4 h-48 w-full rounded-[var(--radius-xl)] object-cover sm:h-64" />
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -119,6 +137,25 @@ export function ProjectDetailClient({ id }: { id: string }) {
             {project.submissionCount} builder{project.submissionCount === 1 ? '' : 's'} submitted
           </span>
         </div>
+
+        {!tierLocked && user && (
+          <div className="mt-5 rounded-[var(--radius-lg)] border border-rim-subtle bg-card p-4" data-testid="project-start">
+            {!isStarted ? (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-dim">Ready to build it? Starting adds it to <Link href="/my-projects" className="font-medium text-brand">My projects</Link>{project.hasStarter ? ' and unlocks the starter files.' : '.'}</p>
+                <Button onClick={() => start.mutate()} disabled={start.isPending} data-testid="start-project"><Play size={14} /> {start.isPending ? 'Starting…' : 'Start project'}</Button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-ink">You started this project. <Link href="/my-projects" className="font-medium text-brand">See My projects</Link></p>
+                {project.hasStarter ? (
+                  <Button variant="outline" onClick={() => download.mutate()} disabled={download.isPending} data-testid="download-starter"><Download size={14} /> {download.isPending ? 'Preparing…' : 'Download starter'}</Button>
+                ) : <p className="text-xs text-ghost">This project has no starter files; build it from scratch.</p>}
+              </div>
+            )}
+            {startError && <p role="alert" className="mt-2 text-xs text-error">{startError}</p>}
+          </div>
+        )}
 
         {project.techStack.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">

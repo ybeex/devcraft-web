@@ -1,110 +1,128 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
-import { hoverLift, cascadeContainer, cascadeItem } from '@/lib/motion/variants'
+import { RevealItem, RevealGroup, SectionHeading, SpotlightCard, GradientText } from './primitives'
+import { cn } from '@/lib/utils'
 
-const FE_TECH = ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Testing', 'Performance']
-const BE_TECH = ['Node.js', 'Express', 'SQL', 'PostgreSQL', 'REST', 'GraphQL', 'Auth', 'System Design']
+const FE_TECH = ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Next.js']
+const BE_TECH = ['Node.js', 'Express', 'SQL', 'PostgreSQL', 'REST', 'System Design']
 
-function TrackCard({
-  trackName,
-  href,
-  icon,
-  accent,
-  description,
-  tech,
-}: {
-  trackName: string
-  href: string
-  icon: 'trackFe' | 'trackBe'
-  accent: 'fe' | 'be'
-  description: string
-  tech: string[]
-}) {
-  return (
-    <motion.div variants={cascadeItem} {...hoverLift}>
-      <Link
-        href={href}
-        className="group block h-full rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-8 shadow-elev-sm transition-shadow hover:shadow-elev-md"
-      >
-        <div className="flex items-start justify-between">
-          <FeatureIcon name={icon} size={56} />
-          <ArrowRight
-            size={20}
-            className={
-              accent === 'fe'
-                ? 'text-fe -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100'
-                : 'text-be -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100'
-            }
-          />
-        </div>
-        <h3 className="mt-6 font-display text-2xl font-bold text-ink">{trackName}</h3>
-        <p className="mt-2 text-sm text-dim">{description}</p>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          {tech.map((t) => (
-            <span
-              key={t}
-              className="rounded-full border border-rim-subtle bg-raised px-3 py-1 text-xs font-medium text-dim"
-            >
-              {t}
-            </span>
-          ))}
-        </div>
-
-        <div
-          className={
-            accent === 'fe'
-              ? 'mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-fe'
-              : 'mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-be'
-          }
-        >
-          Start {trackName.split(' ')[0]} track <ArrowRight size={14} />
-        </div>
-      </Link>
-    </motion.div>
-  )
-}
+const TRACKS = [
+  {
+    name: 'Frontend Engineering',
+    href: '/fe',
+    icon: 'trackFe' as const,
+    accent: 'fe' as const,
+    tagline: 'Interface craft, from markup to production React.',
+    description:
+      'From semantic HTML to production React applications, with performance and testing built in from day one.',
+    outcomes: ['Accessible component systems', 'Data-driven React apps', 'Web performance audits'],
+    tech: FE_TECH,
+  },
+  {
+    name: 'Backend Engineering',
+    href: '/be',
+    icon: 'trackBe' as const,
+    accent: 'be' as const,
+    tagline: 'Server-side systems that hold up under load.',
+    description:
+      'Build robust, scalable server-side systems — from Node fundamentals to distributed system design.',
+    outcomes: ['REST + GraphQL APIs', 'Relational data modelling', 'Auth, caching & system design'],
+    tech: BE_TECH,
+  },
+]
 
 export function TracksSection() {
   return (
-    <section id="tracks" className="px-6 py-24">
+    <section id="tracks" className="relative overflow-hidden px-6 py-24">
       <div className="mx-auto max-w-5xl">
-        <div className="mx-auto max-w-xl text-center">
-          <h2 className="font-display text-3xl font-bold text-ink sm:text-4xl">Two tracks. Done with depth.</h2>
-          <p className="mt-3 text-dim">
-            No data science tangents, no Python ML detours. Razor-focused on the two
-            disciplines that power the modern web stack.
-          </p>
-        </div>
+        <SectionHeading
+          eyebrow="Two disciplines, zero filler"
+          title={
+            <>
+              Two tracks. <GradientText>Done with depth.</GradientText>
+            </>
+          }
+          subtitle="No data-science tangents, no ML detours. Razor-focused on the two disciplines that power the modern web."
+        />
 
-        <motion.div
-          variants={cascadeContainer}
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: '-80px' }}
-          className="mt-12 grid gap-6 sm:grid-cols-2"
-        >
-          <TrackCard
-            trackName="Frontend Engineering"
-            href="/fe"
-            icon="trackFe"
-            accent="fe"
-            description="From semantic HTML to production React applications, with performance and testing built in from day one."
-            tech={FE_TECH}
-          />
-          <TrackCard
-            trackName="Backend Engineering"
-            href="/be"
-            icon="trackBe"
-            accent="be"
-            description="Build robust, scalable server-side systems — from Node fundamentals to distributed system design."
-            tech={BE_TECH}
-          />
-        </motion.div>
+        <RevealGroup className="mt-14 grid gap-6 sm:grid-cols-2" stagger={0.12}>
+          {TRACKS.map((track) => (
+            <RevealItem key={track.name} className="h-full">
+              <SpotlightCard accent={track.accent} className="h-full p-8">
+                <div
+                  aria-hidden
+                  className={cn(
+                    'pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-[var(--radius-xl)] opacity-70',
+                    track.accent === 'fe'
+                      ? 'bg-[radial-gradient(80%_100%_at_20%_0%,rgba(255,121,0,.16),transparent_70%)]'
+                      : 'bg-[radial-gradient(80%_100%_at_20%_0%,rgba(57,133,255,.16),transparent_70%)]'
+                  )}
+                />
+                <div className="relative flex items-start justify-between">
+                  <FeatureIcon name={track.icon} size={60} />
+                  <span
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wide',
+                      track.accent === 'fe'
+                        ? 'border-fe/30 bg-[rgba(255,121,0,.1)] text-fe'
+                        : 'border-be/30 bg-[rgba(57,133,255,.1)] text-be'
+                    )}
+                  >
+                    {track.accent === 'fe' ? 'UI & React' : 'APIs & Scale'}
+                  </span>
+                </div>
+
+                <h3 className="relative mt-6 font-display text-2xl font-bold text-ink">{track.name}</h3>
+                <p
+                  className={cn(
+                    'relative mt-1 text-sm font-semibold',
+                    track.accent === 'fe' ? 'text-fe' : 'text-be'
+                  )}
+                >
+                  {track.tagline}
+                </p>
+                <p className="relative mt-3 text-sm text-dim">{track.description}</p>
+
+                <ul className="relative mt-6 flex flex-col gap-2">
+                  {track.outcomes.map((outcome) => (
+                    <li key={outcome} className="flex items-center gap-2 text-sm text-ink">
+                      <ArrowRight
+                        size={14}
+                        className={track.accent === 'fe' ? 'text-fe' : 'text-be'}
+                      />
+                      {outcome}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="relative mt-6 flex flex-wrap gap-2">
+                  {track.tech.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full border border-rim-subtle bg-raised px-3 py-1 text-xs font-medium text-dim"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                <div
+                  className={cn(
+                    'relative mt-8 inline-flex items-center gap-1.5 text-sm font-semibold transition-transform duration-300 group-hover:translate-x-1',
+                    track.accent === 'fe' ? 'text-fe' : 'text-be'
+                  )}
+                >
+                  Start the {track.name.split(' ')[0]} track <ArrowRight size={14} />
+                </div>
+
+                <Link href={track.href} className="absolute inset-0 z-[2]" aria-label={`Go to ${track.name}`} />
+              </SpotlightCard>
+            </RevealItem>
+          ))}
+        </RevealGroup>
       </div>
     </section>
   )
