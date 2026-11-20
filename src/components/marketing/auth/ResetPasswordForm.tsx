@@ -14,6 +14,7 @@ import { resetPassword } from '@/lib/api/auth'
 import { ApiRequestError } from '@/lib/api/client'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { GradientText, SpotlightCard } from '@/components/marketing/primitives'
 
 export function ResetPasswordForm() {
   const token = useSearchParams().get('token')
@@ -44,7 +45,7 @@ export function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 text-center shadow-elev-lg">
+      <SpotlightCard interactive={false} className="p-7 text-center shadow-elev-lg">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--negative-bg)] text-[var(--negative-text)]">
           <AlertCircle size={22} />
         </div>
@@ -53,12 +54,12 @@ export function ResetPasswordForm() {
         <Link href="/forgot-password" className="mt-4 inline-block text-sm font-semibold text-brand hover:underline">
           Request a new link
         </Link>
-      </div>
+      </SpotlightCard>
     )
   }
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-lg">
+    <SpotlightCard interactive={false} className="p-7 shadow-elev-lg">
       <AnimatePresence mode="wait">
         {submitted ? (
           <motion.div
@@ -77,12 +78,14 @@ export function ResetPasswordForm() {
               devices.
             </p>
             <Link href="/login" className="mt-2 w-full">
-              <Button className="w-full justify-center">Log in</Button>
+              <Button className="shine glow-brand w-full justify-center">Log in</Button>
             </Link>
           </motion.div>
         ) : (
           <motion.div key="form" exit={{ opacity: 0 }}>
-            <h1 className="font-display text-2xl font-bold text-ink">Set a new password</h1>
+            <h1 className="font-display text-2xl font-bold text-ink">
+              Set a new <GradientText>password</GradientText>
+            </h1>
             <p className="mt-1.5 text-sm text-dim">Make it something you haven&apos;t used before.</p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
@@ -136,13 +139,13 @@ export function ResetPasswordForm() {
                 )}
               </label>
 
-              <Button type="submit" disabled={isSubmitting} className="mt-2 w-full justify-center">
+              <Button type="submit" disabled={isSubmitting} className="shine glow-brand mt-2 w-full justify-center">
                 {isSubmitting ? 'Resetting...' : 'Reset password'}
               </Button>
             </form>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </SpotlightCard>
   )
 }
