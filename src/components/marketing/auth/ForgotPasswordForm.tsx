@@ -11,6 +11,7 @@ import { ForgotPasswordFormSchema, type ForgotPasswordFormValues } from '@/lib/s
 import { forgotPassword } from '@/lib/api/auth'
 import { easeOut } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
+import { GradientText, SpotlightCard } from '@/components/marketing/primitives'
 
 export function ForgotPasswordForm() {
   const [submitted, setSubmitted] = useState(false)
@@ -31,7 +32,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <div className="rounded-[var(--radius-xl)] border border-rim-subtle bg-card p-7 shadow-elev-lg">
+    <SpotlightCard interactive={false} className="p-7 shadow-elev-lg">
       <AnimatePresence mode="wait">
         {submitted ? (
           <motion.div
@@ -54,7 +55,9 @@ export function ForgotPasswordForm() {
           </motion.div>
         ) : (
           <motion.div key="form" exit={{ opacity: 0 }}>
-            <h1 className="font-display text-2xl font-bold text-ink">Reset your password</h1>
+            <h1 className="font-display text-2xl font-bold text-ink">
+              Reset your <GradientText>password</GradientText>
+            </h1>
             <p className="mt-1.5 text-sm text-dim">
               Enter the email on your account and we&apos;ll send a reset link.
             </p>
@@ -76,7 +79,7 @@ export function ForgotPasswordForm() {
                 {errors.email && <span className="text-xs font-medium text-error">{errors.email.message}</span>}
               </label>
 
-              <Button type="submit" disabled={isSubmitting} className="mt-2 w-full justify-center">
+              <Button type="submit" disabled={isSubmitting} className="shine glow-brand mt-2 w-full justify-center">
                 {isSubmitting ? 'Sending...' : 'Send reset link'}
               </Button>
             </form>
@@ -90,6 +93,6 @@ export function ForgotPasswordForm() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </SpotlightCard>
   )
 }
