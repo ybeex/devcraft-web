@@ -5,7 +5,8 @@ import { motion } from 'framer-motion'
 import { Check } from 'lucide-react'
 import { FeatureIcon } from '@/components/brand/FeatureIcon'
 import { Button } from '@/components/ui/Button'
-import { cascadeContainer, cascadeItem, hoverLift } from '@/lib/motion/variants'
+import { Eyebrow, GradientText, SpotlightCard } from '@/components/marketing/primitives'
+import { cascadeContainer, cascadeItem } from '@/lib/motion/variants'
 import { cn } from '@/lib/utils'
 
 interface TrackSelectStepProps {
@@ -14,9 +15,11 @@ interface TrackSelectStepProps {
   onContinue: () => void
 }
 
+// Each card glows in its own track's discipline colour — Frontend stays orange,
+// Backend goes blue — so the choice is legible before the copy is read.
 const TRACKS = [
-  { id: 'FE' as const, icon: 'trackFe' as const, name: 'Frontend', desc: 'Interfaces people love using. HTML to production React.' },
-  { id: 'BE' as const, icon: 'trackBe' as const, name: 'Backend', desc: 'Systems that scale. APIs, databases, infrastructure.' },
+  { id: 'FE' as const, icon: 'trackFe' as const, accent: 'fe' as const, name: 'Frontend', desc: 'Interfaces people love using. HTML to production React.' },
+  { id: 'BE' as const, icon: 'trackBe' as const, accent: 'be' as const, name: 'Backend', desc: 'Systems that scale. APIs, databases, infrastructure.' },
 ]
 
 /** Choosing a card only selects it; Continue confirms. A stray tap used to commit the choice and move on. */
@@ -26,36 +29,52 @@ export function TrackSelectStep({ selected, onSelect, onContinue }: TrackSelectS
   useEffect(() => { heading.current?.focus() }, [])
   return (
     <div className="flex flex-col items-center text-center">
-      <h1 ref={heading} tabIndex={-1} className="font-display text-3xl font-bold sm:text-4xl">Which craft calls to you?</h1>
-      <p className="mt-3 max-w-sm text-white/90">Pick a track to start. You can explore the other one later.</p>
+      <Eyebrow>Step 1 · Pick your track</Eyebrow>
+      <h1 ref={heading} tabIndex={-1} className="mt-5 font-display text-3xl font-bold sm:text-4xl">
+        Which <GradientText>craft</GradientText> calls to you?
+      </h1>
+      <p className="mt-3 max-w-sm text-dim">Pick a track to start. You can explore the other one later.</p>
 
-      <motion.div variants={cascadeContainer} initial="initial" animate="animate" role="radiogroup" aria-label="Track" className="mt-10 grid w-full max-w-md gap-4 sm:grid-cols-2">
+      <motion.div
+        variants={cascadeContainer}
+        initial="initial"
+        animate="animate"
+        role="radiogroup"
+        aria-label="Track"
+        className="mt-9 grid w-full gap-4 sm:grid-cols-2"
+      >
         {TRACKS.map((track) => {
           const on = selected === track.id
           return (
-            <motion.button
-              key={track.id}
-              type="button"
-              role="radio"
-              aria-checked={on}
-              variants={cascadeItem}
-              {...hoverLift}
-              onClick={() => onSelect(track.id)}
-              className={cn(
-                'relative flex flex-col items-center gap-3 rounded-[var(--radius-xl)] border p-6 backdrop-blur-sm transition-colors',
-                on ? 'border-white bg-white/25' : 'border-white/30 bg-white/10 hover:bg-white/15',
-              )}
-            >
-              {on && <Check size={18} className="absolute right-3 top-3 text-white" aria-hidden />}
-              <FeatureIcon name={track.icon} size={56} />
-              <span className="font-ui text-lg font-bold">{track.name}</span>
-              <span className="text-sm text-white/90">{track.desc}</span>
-            </motion.button>
+            <motion.div key={track.id} variants={cascadeItem}>
+              <SpotlightCard accent={track.accent} className={cn('h-full p-0', on && 'glow-brand')}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => onSelect(track.id)}
+                  className="relative flex h-full w-full flex-col items-center gap-3 rounded-[var(--radius-xl)] p-6 text-center"
+                >
+                  {on && (
+                    <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-full bg-brand text-[#080d1c] shadow-elev-sm">
+                      <Check size={14} aria-hidden />
+                    </span>
+                  )}
+                  <span className={cn('transition-transform duration-300', on && 'scale-110')}>
+                    <FeatureIcon name={track.icon} size={56} />
+                  </span>
+                  <span className="font-ui text-lg font-bold text-ink">{track.name}</span>
+                  <span className="text-sm text-dim">{track.desc}</span>
+                </button>
+              </SpotlightCard>
+            </motion.div>
           )
         })}
       </motion.div>
 
-      <Button onClick={onContinue} disabled={!selected} className="mt-10 w-full max-w-xs justify-center">Continue</Button>
+      <Button onClick={onContinue} disabled={!selected} className="shine glow-brand mt-9 w-full max-w-xs justify-center">
+        Continue
+      </Button>
     </div>
   )
 }

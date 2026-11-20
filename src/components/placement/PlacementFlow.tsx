@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { AlertCircle, ArrowRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { GradientText } from '@/components/marketing/primitives'
 import { ApiRequestError } from '@/lib/api/client'
 import {
   startPlacement, answerPlacement, PLACEMENT_STALE,
@@ -10,12 +11,8 @@ import {
 } from '@/lib/api/placement'
 import { cn } from '@/lib/utils'
 
-/** "onboarding" sits on the dark gradient (white text); "app" sits on the normal page. */
-type Tone = 'onboarding' | 'app'
-
 interface PlacementFlowProps {
   track: 'FE' | 'BE'
-  tone: Tone
   /** Called when the learner leaves the result screen. */
   onDone: (result: PlacementResult) => void
   /** Optional "decide later" exit on the first screen. */
@@ -30,24 +27,13 @@ type Phase =
   | { kind: 'expired' }
   | { kind: 'result'; result: PlacementResult }
 
-const TONES: Record<Tone, { sub: string; card: string; cardOn: string; link: string; panel: string; alert: string }> = {
-  onboarding: {
-    sub: 'text-white/90',
-    card: 'border-white/35 bg-white/10 text-white backdrop-blur-sm hover:bg-white/15',
-    cardOn: 'border-white bg-white text-ink',
-    link: 'text-white underline underline-offset-4 hover:no-underline',
-    panel: 'border-white/30 bg-white/10 text-white backdrop-blur-sm',
-    alert: 'bg-white text-[var(--negative-text)]',
-  },
-  app: {
-    sub: 'text-dim',
-    card: 'border-rim-subtle bg-card text-ink hover:border-rim',
-    cardOn: 'border-brand bg-card text-ink ring-2 ring-brand/30',
-    link: 'text-brand underline underline-offset-4 hover:no-underline',
-    panel: 'border-rim-subtle bg-card text-ink',
-    alert: 'border border-rim bg-card text-[var(--negative-text)]',
-  },
-}
+// Theme-aware, marketing-styled surfaces — the same card language the rest of the
+// app now speaks, so the check reads as part of the premium flow rather than a form.
+const SUB = 'text-dim'
+const CARD = 'border-rim-subtle bg-card text-ink hover:border-brand/40'
+const CARD_ON = 'border-brand/50 bg-brand-muted text-ink ring-2 ring-brand/25'
+const LINK = 'text-dim underline underline-offset-4 hover:text-ink hover:no-underline'
+const ALERT = 'border border-[var(--negative-bg)] bg-[var(--negative-bg)] text-[var(--negative-text)]'
 
 const CHOICES: Array<{ id: SelfReport; title: string; body: string }> = [
   { id: 'new', title: 'I’m new to this', body: 'Start from the very beginning. No questions.' },
@@ -66,8 +52,7 @@ function messageFor(err: unknown): string {
   return 'Something went wrong on our side. Check your connection and try again.'
 }
 
-export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Continue' }: PlacementFlowProps) {
-  const t = TONES[tone]
+export function PlacementFlow({ track, onDone, onLater, doneLabel = 'Continue' }: PlacementFlowProps) {
   const [phase, setPhase] = useState<Phase>({ kind: 'choose' })
   const [picked, setPicked] = useState<number | null>(null)   // option position on screen
   const [error, setError] = useState<string | null>(null)
@@ -114,7 +99,7 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
   }
 
   const errorBox = error && (
-    <div role="alert" className={cn('mt-6 flex w-full max-w-md items-start gap-2 rounded-[var(--radius-lg)] px-4 py-3 text-left text-sm font-medium', t.alert)}>
+    <div role="alert" className={cn('mt-6 flex w-full max-w-md items-start gap-2 rounded-[var(--radius-lg)] px-4 py-3 text-left text-sm font-medium', ALERT)}>
       <AlertCircle size={18} className="mt-0.5 shrink-0" aria-hidden />
       <span>{error}</span>
     </div>
@@ -132,8 +117,8 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
     return (
       <div className="flex flex-col items-center text-center">
         <h2 ref={heading} tabIndex={-1} className="font-display text-2xl font-bold outline-none">That check timed out</h2>
-        <p className={cn('mt-3 max-w-sm', t.sub)}>It’s only kept for half an hour. Nothing was saved, so you can simply start again.</p>
-        <Button onClick={() => { setPhase({ kind: 'choose' }); setError(null) }} className="mt-8 w-full max-w-xs justify-center">Start again</Button>
+        <p className={cn('mt-3 max-w-sm', SUB)}>It’s only kept for half an hour. Nothing was saved, so you can simply start again.</p>
+        <Button onClick={() => { setPhase({ kind: 'choose' }); setError(null) }} className="shine glow-brand mt-8 w-full max-w-xs justify-center">Start again</Button>
       </div>
     )
   }
@@ -146,11 +131,11 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
         <h2 ref={heading} tabIndex={-1} className="font-display text-3xl font-bold outline-none sm:text-4xl">
           {r.selfReport === 'new' ? 'Starting from the beginning' : `You’ll start at ${where}`}
         </h2>
-        <p className={cn('mt-3 max-w-sm', t.sub)}>
+        <p className={cn('mt-3 max-w-sm', SUB)}>
           {r.selfReport === 'new' ? `First up: ${where}.` : r.completedAll ? 'You answered everything we asked, so you’re starting in the last module we could place you in.' : LEVEL_TEXT[r.level]}
         </p>
-        {r.tested > 0 && <p className={cn('mt-2 text-sm', t.sub)}>Based on {r.tested} question{r.tested === 1 ? '' : 's'}. You can retake this any time from your learning plan.</p>}
-        <Button onClick={() => onDone(r)} className="mt-8 w-full max-w-xs justify-center">{doneLabel} <ArrowRight size={16} aria-hidden /></Button>
+        {r.tested > 0 && <p className={cn('mt-2 text-sm', SUB)}>Based on {r.tested} question{r.tested === 1 ? '' : 's'}. You can retake this any time from your learning plan.</p>}
+        <Button onClick={() => onDone(r)} className="shine glow-brand mt-8 w-full max-w-xs justify-center">{doneLabel} <ArrowRight size={16} aria-hidden /></Button>
       </div>
     )
   }
@@ -162,10 +147,10 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
         className="flex w-full flex-col items-center text-center"
         onSubmit={(e) => { e.preventDefault(); if (picked !== null) void submit(picked) }}
       >
-        <p className={cn('text-xs font-semibold uppercase tracking-wide', t.sub)}>Question {q.number} of about {q.ofAbout}</p>
+        <p className={cn('text-xs font-semibold uppercase tracking-wide', SUB)}>Question {q.number} of about {q.ofAbout}</p>
         <h2 ref={heading} tabIndex={-1} id="placement-q" className="mt-3 max-w-md whitespace-pre-wrap font-display text-xl font-bold outline-none sm:text-2xl">{q.prompt}</h2>
         {q.code && (
-          <pre data-testid="placement-code" tabIndex={0} aria-label="Code to read" className="mt-5 w-full max-w-md overflow-x-auto rounded-[var(--radius-md)] border border-rim-subtle bg-card p-4 text-left font-mono text-[13px] leading-relaxed text-ink">
+          <pre data-testid="placement-code" tabIndex={0} aria-label="Code to read" className="mt-5 w-full max-w-md overflow-x-auto rounded-[var(--radius-md)] border border-rim-subtle p-4 text-left font-mono text-[13px] leading-relaxed text-ink" style={{ background: 'var(--code-bg)' }}>
             <code>{q.code}</code>
           </pre>
         )}
@@ -179,7 +164,7 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
                 <span className={cn(
                   'flex items-start gap-3 rounded-[var(--radius-lg)] border px-4 py-3 text-sm font-medium transition-colors',
                   'peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-current',
-                  on ? t.cardOn : t.card,
+                  on ? CARD_ON : CARD,
                 )}>
                   <span aria-hidden className={cn('mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border', on ? 'border-current' : 'border-current/50')}>
                     {on && <Check size={11} />}
@@ -193,10 +178,10 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
 
         {errorBox}
 
-        <Button type="submit" disabled={picked === null} className="mt-8 w-full max-w-xs justify-center">
+        <Button type="submit" disabled={picked === null} className="shine glow-brand mt-8 w-full max-w-xs justify-center">
           {error ? 'Try again' : 'Next'}
         </Button>
-        <button type="button" onClick={() => void submit(null)} className={cn('mt-3 text-sm font-medium', t.link)}>
+        <button type="button" onClick={() => void submit(null)} className={cn('mt-3 text-sm font-medium', LINK)}>
           I’m not sure
         </button>
       </form>
@@ -205,28 +190,30 @@ export function PlacementFlow({ track, tone, onDone, onLater, doneLabel = 'Conti
 
   return (
     <div className="flex flex-col items-center text-center">
-      <h2 ref={heading} tabIndex={-1} className="font-display text-3xl font-bold outline-none sm:text-4xl">Where are you starting?</h2>
-      <p className={cn('mt-3 max-w-sm', t.sub)}>We’ll pick your first lessons to match. It isn’t a grade, and you can retake it later.</p>
+      <h2 ref={heading} tabIndex={-1} className="font-display text-3xl font-bold outline-none sm:text-4xl">
+        Where are you <GradientText>starting</GradientText>?
+      </h2>
+      <p className={cn('mt-3 max-w-sm', SUB)}>We’ll pick your first lessons to match. It isn’t a grade, and you can retake it later.</p>
 
-      <div className="mt-10 flex w-full max-w-md flex-col gap-3 text-left">
+      <div className="mt-9 flex w-full max-w-md flex-col gap-3 text-left">
         {CHOICES.map((c) => (
           <button
             key={c.id}
             type="button"
             onClick={() => void begin(c.id)}
-            className={cn('rounded-[var(--radius-lg)] border px-5 py-4 transition-colors', t.card)}
+            className={cn('lift rounded-[var(--radius-lg)] border px-5 py-4 text-left transition-colors', CARD)}
           >
             <span className="block text-base font-semibold">{c.title}</span>
-            <span className={cn('mt-0.5 block text-sm', tone === 'onboarding' ? 'text-white/85' : 'text-dim')}>{c.body}</span>
+            <span className={cn('mt-0.5 block text-sm', SUB)}>{c.body}</span>
           </button>
         ))}
       </div>
 
       {errorBox}
-      {error && lastChoice && <p className={cn('mt-3 text-sm', t.sub)}>Pick one again to retry.</p>}
+      {error && lastChoice && <p className={cn('mt-3 text-sm', SUB)}>Pick one again to retry.</p>}
 
       {onLater && (
-        <button type="button" onClick={onLater} className={cn('mt-6 text-sm font-medium', t.link)}>Decide later</button>
+        <button type="button" onClick={onLater} className={cn('mt-6 text-sm font-medium', LINK)}>Decide later</button>
       )}
     </div>
   )
