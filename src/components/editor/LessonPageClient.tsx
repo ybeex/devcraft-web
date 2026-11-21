@@ -9,6 +9,7 @@ import { LessonContentPane } from './LessonContentPane'
 import { LessonEditorPane } from './LessonEditorPane'
 import { LessonOutputPane, LessonTestsPanel } from './LessonOutputPane'
 import { GitLessonPane } from './GitLessonPane'
+import { ProtocolLabPane } from './ProtocolLabPane'
 import { cn } from '@/lib/utils'
 import { LessonPageLoading } from './LessonPageLoading'
 import { LessonPageOverlays } from './LessonPageOverlays'
@@ -22,7 +23,7 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
   const router = useRouter()
   const page = useLessonPage(track, slug)
   const {
-    lesson, curriculum, isLoading, isApp, isGit, isDocker, isLab, app, quota, code, setCode, webContent,
+    lesson, curriculum, isLoading, isApp, isGit, isDocker, isLab, isProtocol, app, quota, code, setCode, webContent,
     previewCode, appPreviewDoc, reloadKey, published, setPublished, publishing, runResult,
     checkResult, confettiKey, moduleMilestone, setModuleMilestone, outputTab, setOutputTab, mobileTab, setMobileTab, webBottomTab,
     setWebBottomTab, webPanelRevealKey, webEditorTab, setWebEditorTab, contentWidth,
@@ -92,7 +93,9 @@ export function LessonPageClient({ track, slug }: { track: 'FE' | 'BE'; slug: st
     />
   )
   const outputPane = <LessonOutputPane runResult={runResult} checkResult={checkResult} activeTab={outputTab} onTabChange={setOutputTab} language={lesson.language} code={isApp ? previewCode : code} app={app} reloadKey={reloadKey} errorHelp={lesson.errorHelp} quota={quota} collapsed={usesTabbedOutputCollapse && outputCollapsed} onToggleCollapse={usesTabbedOutputCollapse ? () => setOutputCollapsed((collapsed) => !collapsed) : undefined} onRun={handleRun} onCheck={handleCheck} onReset={handleReset} onAskForHelp={() => setAiOpen(true)} isRunning={isRunning} isChecking={isChecking} />
-  const editorWorkspace = isLab ? (
+  const editorWorkspace = isProtocol ? (
+    <ProtocolLabPane key={lesson.id} lesson={lesson} code={code} onChange={setCode} onCheck={handleCheck} onReset={handleReset} isChecking={isChecking} checkResult={checkResult} />
+  ) : isLab ? (
     <GitLessonPane lessonId={lesson.id} kind={isDocker ? 'docker' : 'git'} checkResult={checkResult} isChecking={isChecking} onCheck={handleCheck} />
   ) : isWebLesson ? lessonEditor : (
     <>
