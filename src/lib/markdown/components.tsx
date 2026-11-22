@@ -1,5 +1,6 @@
 import type { Components } from 'react-markdown'
 import { SyntaxCode } from './SyntaxCode'
+import { LessonVisual } from '@/components/visuals/LessonVisual'
 
 /**
  * Shared prose renderer for react-markdown. Originally lived inline in
@@ -36,6 +37,8 @@ export const markdownComponents: Components = {
       return <code className="rounded bg-raised px-1.5 py-0.5 font-mono text-[13px] text-brand">{children}</code>
     }
     const language = className?.replace('language-', '') ?? ''
+    // A ```visual block is a diagram described as JSON; it renders as an interactive figure instead of code.
+    if (language === 'visual') return <LessonVisual source={String(children)} />
     return (
       <div className="mb-4 overflow-hidden rounded-[var(--radius-md)] border border-rim-subtle">
         <div className="flex items-center gap-1.5 border-b border-rim-subtle bg-raised px-3 py-2">

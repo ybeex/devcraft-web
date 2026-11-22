@@ -43,6 +43,7 @@ export function useLessonPage(track: 'FE' | 'BE', slug: string) {
   const isGit = lesson?.language === 'git-lab'
   const isDocker = lesson?.language === 'docker-lab'
   const isLab = isGit || isDocker
+  const isProtocol = lesson?.language === 'protocol-lab'
   const sqlFreeLesson = lesson?.language === 'postgresql' && lesson.isPremium === false
   const { data: quotaStatus } = useQuery({
     queryKey: ['free-quota'],
@@ -312,7 +313,7 @@ export function useLessonPage(track: 'FE' | 'BE', slug: string) {
   const usesTabbedOutputCollapse = isSqlLesson || lesson?.language === 'javascript' || lesson?.language === 'typescript'
 
   return {
-    lesson, curriculum, isLoading, isApp, isGit, isDocker, isLab, app, quota, code, setCode, webContent,
+    lesson, curriculum, isLoading, isApp, isGit, isDocker, isLab, isProtocol, app, quota, code, setCode, webContent,
     previewCode, appPreviewDoc, reloadKey, setReloadKey, published, setPublished, publishing, runResult,
     checkResult, setCheckResult, confettiKey, moduleMilestone, setModuleMilestone, outputTab, setOutputTab, mobileTab, setMobileTab, webBottomTab,
     setWebBottomTab, webPanelRevealKey, setWebPanelRevealKey, webEditorTab, setWebEditorTab, contentWidth,

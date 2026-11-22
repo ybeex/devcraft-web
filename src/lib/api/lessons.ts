@@ -27,6 +27,8 @@ export interface LessonDetail {
   knowledgeCheck?: KnowledgeCheckItem[]
   rubric?: { prompt: string; criteria: { criterion: string; evidence: string }[] } | null
   competencies?: string[]
+  /** Settings kept apart from the text. For protocol labs: which simulator to show and its fixed scenario. */
+  environment?: { runtime?: string; lab?: 'http-request' | 'http-response' | 'dns-zone' | 'dns-resolve'; scenario?: unknown; note?: string } | null
   prerequisites?: Prerequisite[]
   next?: { slug: string; title: string; kind: string } | null
   // solutionCode and testCode are deliberately never sent by the backend
